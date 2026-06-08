@@ -1,0 +1,15 @@
+name: Rebuild quotidien (avis Google)
+
+on:
+  schedule:
+    - cron: '0 4 * * *'  # tous les jours à 4h du matin (UTC)
+  workflow_dispatch:       # permet aussi de lancer manuellement depuis GitHub
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déclencher le redéploiement Render
+        run: |
+          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}" \
+            -o /dev/null -w "HTTP status: %{http_code}\n"
