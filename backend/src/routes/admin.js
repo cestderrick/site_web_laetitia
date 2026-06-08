@@ -173,7 +173,8 @@ router.post('/reviews', requireAdmin, async (req, res) => {
     await addReview(review)
     res.json({ success: true, review })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('❌ addReview error:', JSON.stringify(err?.errors || err?.response?.data || err.message))
+    res.status(500).json({ error: err.message, detail: err?.errors?.[0]?.message })
   }
 })
 
