@@ -1,0 +1,38 @@
+{
+  "slotDurationMinutes": 60,
+  "availabilityStart": "09:00",
+  "availabilityEnd": "19:00",
+  "availabilityDays": [1, 2, 3, 4, 5],
+  "types": [
+    {
+      "id": "coaching-presentiel",
+      "label": "Coaching – Présentiel",
+      "emoji": "🎯",
+      "mode": "presentiel",
+      "adresse": "29 place Bellecour, 69002 Lyon",
+      "active": true
+    },
+    {
+      "id": "coaching-visio",
+      "label": "Coaching – Visio",
+      "emoji": "🎯",
+      "mode": "visio",
+      "active": true
+    },
+    {
+      "id": "sophrologie-presentiel",
+      "label": "Sophrologie – Présentiel",
+      "emoji": "🌿",
+      "mode": "presentiel",
+      "adresse": "29 place Bellecour, 69002 Lyon",
+      "active": true
+    },
+    {
+      "id": "sophrologie-visio",
+      "label": "Sophrologie – Visio",
+      "emoji": "🌿",
+      "mode": "visio",
+      "active": true
+    }
+  ]
+}

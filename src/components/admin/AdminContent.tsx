@@ -1,0 +1,220 @@
+'use client'
+
+import { useEffect, useState, useRef } from 'react'
+import Image from 'next/image'
+
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
+
+type Content = Record<string, Record<string, string>>
+
+const SECTIONS = [
+  {
+    key: 'hero',
+    label: '🏠 Accueil (Hero)',
+    fields: [
+      { key: 'accroche',   label: 'Accroche (sous-titre coloré)' },
+      { key: 'titre',      label: 'Titre principal' },
+      { key: 'sousTitre',  label: 'Paragraphe intro', multiline: true },
+    ],
+  },
+  {
+    key: 'quiSuisJe',
+    label: '👤 Qui suis-je ?',
+    fields: [
+      { key: 'texte1', label: 'Paragraphe 1', multiline: true },
+      { key: 'texte2', label: 'Paragraphe 2', multiline: true },
+      { key: 'texte3', label: 'Paragraphe 3', multiline: true },
+      { key: 'photo',  label: 'Photo (URL ou upload ci-dessous)' },
+    ],
+    hasPhoto: true,
+  },
+  {
+    key: 'vision',
+    label: '🌿 Vision',
+    fields: [
+      { key: 'titre',      label: 'Titre' },
+      { key: 'texte1',     label: 'Paragraphe 1', multiline: true },
+      { key: 'texte2',     label: 'Paragraphe 2', multiline: true },
+      { key: 'conviction', label: 'Ma conviction' },
+    ],
+  },
+  {
+    key: 'coaching',
+    label: '🎯 Coaching',
+    fields: [
+      { key: 'accroche', label: 'Sous-titre' },
+      { key: 'texte',    label: 'Texte', multiline: true },
+    ],
+  },
+  {
+    key: 'sophrologie',
+    label: '🌿 Sophrologie',
+    fields: [
+      { key: 'accroche', label: 'Sous-titre' },
+      { key: 'texte',    label: 'Texte', multiline: true },
+    ],
+  },
+  {
+    key: 'contact',
+    label: '📞 Contact & Réseaux',
+    fields: [
+      { key: 'adresse',   label: 'Adresse' },
+      { key: 'email',     label: 'Email' },
+      { key: 'telephone', label: 'Téléphone' },
+      { key: 'instagram', label: 'Lien Instagram' },
+      { key: 'linkedin',  label: 'Lien LinkedIn' },
+    ],
+  },
+]
+
+export default function AdminContent({ adminKey }: { adminKey: string }) {
+  const [content,    setContent]    = useState<Content | null>(null)
+  const [saved,      setSaved]      = useState(false)
+  const [loading,    setLoading]    = useState(false)
+  const [uploading,  setUploading]  = useState(false)
+  const [openSection, setOpenSection] = useState<string>('hero')
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    fetch(`${BACKEND}/api/admin/content`, { headers: { 'x-admin-key': adminKey } })
+      .then(r => r.json())
+      .then(setContent)
+  }, [adminKey])
+
+  const update = (section: string, field: string, value: string) => {
+    if (!content) return
+    setContent({ ...content, [section]: { ...content[section], [field]: value } })
+  }
+
+  const save = async () => {
+    setLoading(true)
+    await fetch(`${BACKEND}/api/admin/content`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+      body: JSON.stringify(content),
+    })
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
+    setLoading(false)
+  }
+
+  const uploadPhoto = async (file: File, section: string) => {
+    setUploading(true)
+    const form = new FormData()
+    form.append('image', file)
+    const res = await fetch(`${BACKEND}/api/admin/upload`, {
+      method: 'POST',
+      headers: { 'x-admin-key': adminKey },
+      body: form,
+    })
+    const data = await res.json()
+    if (data.url) update(section, 'photo', data.url)
+    setUploading(false)
+  }
+
+  if (!content) return <div className="text-center py-20 text-texte/40">Chargement…</div>
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl text-texte mb-1">Textes & Images</h2>
+        <p className="text-texte/50 text-sm">Les modifications sont appliquées en direct sur le site après sauvegarde.</p>
+      </div>
+
+      {SECTIONS.map(section => (
+        <div key={section.key} className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {/* Accordéon header */}
+          <button
+            onClick={() => setOpenSection(openSection === section.key ? '' : section.key)}
+            className="w-full flex justify-between items-center px-6 py-4 text-left hover:bg-blanc-casse/50 transition-colors"
+          >
+            <span className="font-semibold text-texte">{section.label}</span>
+            <svg
+              className={`w-5 h-5 text-texte/40 transition-transform ${openSection === section.key ? 'rotate-180' : ''}`}
+              fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+
+          {openSection === section.key && (
+            <div className="px-6 pb-6 space-y-4 border-t border-rose-pastel/20">
+              {/* Upload photo si applicable */}
+              {section.hasPhoto && (
+                <div className="pt-4">
+                  <label className="block text-sm font-medium text-texte mb-2">Photo de profil</label>
+                  <div className="flex gap-4 items-start">
+                    {content[section.key]?.photo && (
+                      <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-rose-pastel/10 relative">
+                        <Image
+                          src={content[section.key].photo.startsWith('/uploads')
+                            ? `${BACKEND}${content[section.key].photo}`
+                            : content[section.key].photo}
+                          alt="Photo actuelle"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => fileRef.current?.click()}
+                        disabled={uploading}
+                        className="btn-outline !py-2 !px-4 text-sm disabled:opacity-60"
+                      >
+                        {uploading ? 'Upload en cours…' : '📁 Changer la photo'}
+                      </button>
+                      <input
+                        ref={fileRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={e => {
+                          const file = e.target.files?.[0]
+                          if (file) uploadPhoto(file, section.key)
+                        }}
+                      />
+                      <p className="text-xs text-texte/40">JPG, PNG, WebP — max 5 Mo</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {section.fields.map(field => {
+                if (field.key === 'photo') return null // géré par upload
+                const val = content[section.key]?.[field.key] || ''
+                return (
+                  <div key={field.key} className="pt-4 first:pt-0">
+                    <label className="block text-sm font-medium text-texte mb-1">{field.label}</label>
+                    {field.multiline ? (
+                      <textarea
+                        rows={4}
+                        value={val}
+                        onChange={e => update(section.key, field.key, e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 focus:outline-none focus:border-rose-saumon text-texte text-sm resize-y"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        value={val}
+                        onChange={e => update(section.key, field.key, e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 focus:outline-none focus:border-rose-saumon text-texte text-sm"
+                      />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Sauvegarder */}
+      <div className="flex justify-end pb-10">
+        <button onClick={save} disabled={loading} className="btn-primary disabled:opacity-60 min-w-[160px]">
+          {saved ? '✅ Sauvegardé !' : loading ? 'Sauvegarde…' : 'Sauvegarder tout'}
+        </button>
+      </div>
+    </div>
+  )
+}

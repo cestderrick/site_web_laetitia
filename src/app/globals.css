@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Police Champagne & Limousines ──────────────────────────────────────────
+   Télécharger sur : https://www.dafont.com/champagne-limousines.font
+   Placer les fichiers dans : /public/fonts/
+   ─────────────────────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Champagne & Limousines';
+  src: url('/fonts/Champagne & Limousines.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Champagne & Limousines';
+  src: url('/fonts/Champagne & Limousines Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px; /* hauteur du menu sticky */
+}
+
+body {
+  background-color: #f5f2ef;
+  color: #3a3330;
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Champagne & Limousines', Georgia, serif;
+}
+
+/* ── Utilitaires ──────────────────────────────────────────────────────────── */
+@layer utilities {
+  .section-padding {
+    @apply py-20 px-6 md:px-12 lg:px-24;
+  }
+
+  .container-max {
+    @apply max-w-6xl mx-auto;
+  }
+
+  .btn-primary {
+    @apply bg-rose-saumon text-white px-8 py-3 rounded-full
+           hover:bg-opacity-90 transition-all duration-300
+           font-medium tracking-wide text-sm uppercase;
+  }
+
+  .btn-outline {
+    @apply border-2 border-rose-saumon text-rose-saumon px-8 py-3 rounded-full
+           hover:bg-rose-saumon hover:text-white transition-all duration-300
+           font-medium tracking-wide text-sm uppercase;
+  }
+}
