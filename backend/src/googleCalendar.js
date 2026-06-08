@@ -14,7 +14,7 @@ async function createCalendarEvent({ start, end, summary, location, clientName, 
 
   const event = await calendar.events.insert({
     calendarId,
-    sendNotifications: true,
+    sendNotifications: false,
     requestBody: {
       summary,
       location,
@@ -26,10 +26,6 @@ async function createCalendarEvent({ start, end, summary, location, clientName, 
       ].filter(Boolean).join('\n'),
       start: { dateTime: start, timeZone: 'Europe/Paris' },
       end:   { dateTime: end,   timeZone: 'Europe/Paris' },
-      attendees: [
-        { email: clientEmail, displayName: clientName },
-        { email: process.env.SOPHRO_EMAIL, displayName: process.env.SOPHRO_NAME },
-      ],
       reminders: {
         useDefault: false,
         overrides: [
