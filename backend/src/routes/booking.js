@@ -47,15 +47,16 @@ router.post('/', async (req, res) => {
       notes: notes || '',
     })
 
-    // 4. Emails de confirmation
-    await Promise.all([
-      sendConfirmationToClient({ clientName, clientEmail, chosenMode, location: locationLabel, start: startISO, end: endISO }),
-      sendNotificationToSophro({ clientName, clientEmail, clientPhone, chosenMode, location: locationLabel, start: startISO, notes }),
-    ])
+    // 4. Emails de confirmation (non-bloquant — le RDV est confirmé même si l'email échoue)
+    const type = chosenMode === 'visio' ? 'Visio' : `Présentiel ${slot.location}`
+    Promise.all([
+      sendConfirmationToClient({ clientName, clientEmail, type, location: locationLabel, start: startISO, end: endISO }),
+      sendNotificationToSophro({ clientName, clientEmail, clientPhone, type, location: locationLabel, start: startISO, notes }),
+    ]).catch(err => console.error('Erreur envoi email RDV (non-bloquant):', err.message))
 
     res.json({ success: true, eventId: event.id, message: 'Rendez-vous confirmé !' })
   } catch (err) {
-    console.error('Erreur booking:', err.message)
+    console.error('Erreur booking étape:', err.message)
     res.status(500).json({ error: 'Erreur lors de la réservation. Veuillez réessayer.' })
   }
 })

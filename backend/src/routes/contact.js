@@ -14,7 +14,7 @@ router.post('/entreprise', async (req, res) => {
     await sendEntrepriseConfirmation({ contact, societe, email })
     res.json({ success: true })
   } catch (err) {
-    console.error('Erreur contact entreprise:', err.message)
+    console.error('Erreur contact entreprise:', err.message, err.code)
     res.status(500).json({ error: "Erreur d'envoi. Réessayez ou contactez directement Laetitia." })
   }
 })
@@ -30,7 +30,7 @@ router.post('/', async (req, res) => {
     await sendContactConfirmation({ nom, email })
     res.json({ success: true })
   } catch (err) {
-    console.error('Erreur contact:', err.message)
+    console.error('Erreur contact:', err.message, err.code)
     res.status(500).json({ error: "Erreur d'envoi. Réessayez ou contactez directement Laetitia." })
   }
 })
