@@ -14,7 +14,6 @@ app.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
     googleSheet:    !!process.env.GOOGLE_SHEET_ID && process.env.GOOGLE_SHEET_ID !== 'COLLER_L_ID_ICI',
-    googleSheetId:  process.env.GOOGLE_SHEET_ID,
     googleCalendar: !!process.env.GOOGLE_CALENDAR_ID,
     resend:         !!process.env.RESEND_API_KEY,
   })
