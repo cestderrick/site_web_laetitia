@@ -42,37 +42,18 @@ export default function Avis() {
   const [total,   setTotal]   = useState<number | null>(null)
   const [current, setCurrent] = useState(0)
 
-  const placeId = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID   || 'ChIJR2xafuDr9EcRRioXLswDybg'
-  const apiKey  = process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY || ''
-
   useEffect(() => {
-    if (!apiKey) return
-    const url =
-      `https://maps.googleapis.com/maps/api/place/details/json` +
-      `?place_id=${placeId}` +
-      `&fields=reviews%2Crating%2Cuser_ratings_total` +
-      `&language=fr` +
-      `&reviews_sort=newest` +
-      `&key=${apiKey}`
-
-    fetch(url)
-      .then(r => r.json())
+    fetch('/reviews.json')
+      .then(r => r.ok ? r.json() : null)
       .then(data => {
-        if (data.status !== 'OK' || !data.result?.reviews?.length) return
-        setReviews(data.result.reviews.map((r: any) => ({
-          author: r.author_name,
-          photo:  r.profile_photo_url || null,
-          rating: r.rating,
-          date:   r.relative_time_description,
-          text:   r.text,
-        })))
-        if (data.result.rating)             setRating(data.result.rating)
-        if (data.result.user_ratings_total) setTotal(data.result.user_ratings_total)
+        if (!data?.reviews?.length) return
+        setReviews(data.reviews)
+        if (data.rating) setRating(data.rating)
+        if (data.total)  setTotal(data.total)
       })
       .catch(() => {})
-  }, [apiKey, placeId])
+  }, [])
 
-  // Rien à afficher tant que les avis ne sont pas chargés
   if (reviews.length === 0) return null
 
   const count = reviews.length
