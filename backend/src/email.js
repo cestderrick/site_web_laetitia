@@ -143,9 +143,60 @@ async function sendEntrepriseNotification({ societe, contact, email, telephone, 
   })
 }
 
+/**
+ * Notification à Laetitia pour un message contact
+ */
+async function sendContactNotification({ nom, email, telephone, message }) {
+  await transporter.sendMail({
+    from:    `"P.ose – Message Contact" <${process.env.GMAIL_USER}>`,
+    to:      process.env.SOPHRO_EMAIL,
+    replyTo: email,
+    subject: `✉️ Nouveau message de ${nom}`,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; color: #3a3330;">
+        <div style="background: #f5f2ef; padding: 32px; border-radius: 16px;">
+          <h2 style="color: #f0806b;">Nouveau message via le site</h2>
+          <table style="width:100%; border-collapse:collapse; font-size:14px;">
+            <tr><td style="padding:6px 0; color:#888; width:120px;">Nom</td><td style="font-weight:600">${nom}</td></tr>
+            <tr><td style="padding:6px 0; color:#888">Email</td><td><a href="mailto:${email}" style="color:#f0806b">${email}</a></td></tr>
+            ${telephone ? `<tr><td style="padding:6px 0; color:#888">Téléphone</td><td>${telephone}</td></tr>` : ''}
+          </table>
+          <div style="margin-top:16px; background:white; padding:16px; border-radius:8px; font-size:14px; line-height:1.6">${message}</div>
+        </div>
+      </div>
+    `,
+  })
+}
+
+/**
+ * Confirmation au visiteur qui a envoyé un message
+ */
+async function sendContactConfirmation({ nom, email }) {
+  await transporter.sendMail({
+    from:    `"P.ose Sophrologie & Coaching" <${process.env.GMAIL_USER}>`,
+    to:      email,
+    subject: 'Votre message a bien été reçu',
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; color: #3a3330;">
+        <div style="background: #f5f2ef; padding: 40px; border-radius: 16px;">
+          <h2 style="color: #f0806b;">Merci pour votre message !</h2>
+          <p>Bonjour ${nom},</p>
+          <p>Votre message a bien été reçu. Laetitia vous répondra dans les meilleurs délais.</p>
+          <p style="color: #888; font-size: 13px; margin-top: 24px;">
+            ${process.env.SOPHRO_NAME}<br>
+            Sophrologue &amp; Coach certifiée EMCC
+          </p>
+        </div>
+      </div>
+    `,
+  })
+}
+
 module.exports = {
   sendConfirmationToClient,
   sendNotificationToSophro,
   sendEntrepriseConfirmation,
   sendEntrepriseNotification,
+  sendContactNotification,
+  sendContactConfirmation,
 }

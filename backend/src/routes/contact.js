@@ -1,5 +1,5 @@
 const express = require('express')
-const { sendEntrepriseConfirmation, sendEntrepriseNotification } = require('../email')
+const { sendEntrepriseConfirmation, sendEntrepriseNotification, sendContactNotification, sendContactConfirmation } = require('../email')
 const router  = express.Router()
 
 // POST /api/contact/entreprise
@@ -15,6 +15,22 @@ router.post('/entreprise', async (req, res) => {
     res.json({ success: true })
   } catch (err) {
     console.error('Erreur contact entreprise:', err.message)
+    res.status(500).json({ error: "Erreur d'envoi. Réessayez ou contactez directement Laetitia." })
+  }
+})
+
+// POST /api/contact
+router.post('/', async (req, res) => {
+  const { nom, email, telephone, message } = req.body
+  if (!nom || !email || !message) {
+    return res.status(400).json({ error: 'Champs requis manquants.' })
+  }
+  try {
+    await sendContactNotification({ nom, email, telephone, message })
+    await sendContactConfirmation({ nom, email })
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Erreur contact:', err.message)
     res.status(500).json({ error: "Erreur d'envoi. Réessayez ou contactez directement Laetitia." })
   }
 })

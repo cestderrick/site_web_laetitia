@@ -11,16 +11,25 @@ export default function ContactSection() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value })
 
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(false)
-
-    // TODO: brancher sur l'API backend (POST /api/contact)
-    // Pour l'instant : simulation
-    await new Promise((r) => setTimeout(r, 1000))
-    setSent(true)
-    setLoading(false)
+    try {
+      const r = await fetch(`${backendUrl}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      if (!r.ok) throw new Error()
+      setSent(true)
+    } catch {
+      setError(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
