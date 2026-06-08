@@ -182,26 +182,17 @@ async function getReviews() {
   return rows.slice(1).map(rowToReview)
 }
 
-async function ensureReviewsSheet() {
+async function addReview(review) {
   const sheets = getSheetsClient()
-  const meta   = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID })
-  const exists = meta.data.sheets.some(s => s.properties.title === 'reviews')
-  if (!exists) {
-    await sheets.spreadsheets.batchUpdate({
-      spreadsheetId: SHEET_ID,
-      requestBody: { requests: [{ addSheet: { properties: { title: 'reviews' } } }] },
-    })
+  // Ajouter le header si la feuille est vide
+  const check = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'reviews!A1:F1' })
+  if (!check.data.values?.length) {
     await sheets.spreadsheets.values.update({
       spreadsheetId: SHEET_ID, range: 'reviews!A1',
       valueInputOption: 'RAW',
       requestBody: { values: [REVIEWS_HEADER] },
     })
   }
-}
-
-async function addReview(review) {
-  const sheets = getSheetsClient()
-  await ensureReviewsSheet()
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID, range: REVIEWS_RANGE,
     valueInputOption: 'RAW',
