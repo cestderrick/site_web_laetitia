@@ -1,6 +1,14 @@
-const { Resend } = require('resend')
+const nodemailer = require('nodemailer')
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+})
 
 function formatDate(isoString) {
   return new Date(isoString).toLocaleString('fr-FR', {
@@ -14,8 +22,8 @@ function formatDate(isoString) {
  * Email de confirmation au client
  */
 async function sendConfirmationToClient({ clientName, clientEmail, type, start, end }) {
-  await resend.emails.send({
-    from: `P.ose Sophrologie <${process.env.FROM_EMAIL}>`,
+  await transporter.sendMail({
+    from: `"P.ose Sophrologie" <${process.env.GMAIL_USER}>`,
     to:   clientEmail,
     subject: `✅ Votre RDV ${type} est confirmé`,
     html: `
@@ -52,9 +60,10 @@ async function sendConfirmationToClient({ clientName, clientEmail, type, start, 
  * Notification à Laetitia pour un nouveau RDV
  */
 async function sendNotificationToSophro({ clientName, clientEmail, clientPhone, type, start, notes }) {
-  await resend.emails.send({
-    from: `P.ose – Nouveau RDV <${process.env.FROM_EMAIL}>`,
-    to:   process.env.SOPHRO_EMAIL,
+  await transporter.sendMail({
+    from:    `"P.ose – Nouveau RDV" <${process.env.GMAIL_USER}>`,
+    to:      process.env.SOPHRO_EMAIL,
+    replyTo: clientEmail,
     subject: `📅 Nouveau RDV ${type} – ${clientName}`,
     html: `
       <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; color: #3a3330;">
@@ -79,4 +88,64 @@ async function sendNotificationToSophro({ clientName, clientEmail, clientPhone, 
   })
 }
 
-module.exports = { sendConfirmationToClient, sendNotificationToSophro }
+/**
+ * Email de confirmation devis entreprise au demandeur
+ */
+async function sendEntrepriseConfirmation({ contact, societe, email }) {
+  await transporter.sendMail({
+    from:    `"P.ose Sophrologie & Coaching" <${process.env.GMAIL_USER}>`,
+    to:      email,
+    subject: 'Votre demande de devis a bien été reçue',
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; color: #3a3330;">
+        <div style="background: #f5f2ef; padding: 40px; border-radius: 16px;">
+          <h2 style="color: #f0806b;">Merci pour votre demande !</h2>
+          <p>Bonjour ${contact},</p>
+          <p>Votre demande de devis pour <strong>${societe}</strong> a bien été reçue.</p>
+          <p>Laetitia vous recontactera sous <strong>48h</strong> pour discuter de votre projet.</p>
+          <p style="color: #888; font-size: 13px; margin-top: 24px;">
+            ${process.env.SOPHRO_NAME}<br>
+            Sophrologue &amp; Coach certifiée EMCC<br>
+            <a href="mailto:${process.env.SOPHRO_EMAIL}" style="color: #f0806b;">${process.env.SOPHRO_EMAIL}</a>
+          </p>
+        </div>
+      </div>
+    `,
+  })
+}
+
+/**
+ * Notification devis entreprise à Laetitia
+ */
+async function sendEntrepriseNotification({ societe, contact, email, telephone, effectif, besoin, format, message }) {
+  await transporter.sendMail({
+    from:    `"P.ose – Demande Entreprise" <${process.env.GMAIL_USER}>`,
+    to:      process.env.SOPHRO_EMAIL,
+    replyTo: email,
+    subject: `🏢 Demande devis entreprise – ${societe}`,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; color: #3a3330;">
+        <div style="background: #f5f2ef; padding: 32px; border-radius: 16px;">
+          <h2 style="color: #f0806b; margin-bottom: 16px;">Nouvelle demande entreprise</h2>
+          <table style="width:100%; border-collapse:collapse; font-size:14px;">
+            <tr><td style="padding:6px 0; color:#888; width:160px;">Société</td><td style="font-weight:600">${societe}</td></tr>
+            <tr><td style="padding:6px 0; color:#888">Contact</td><td>${contact}</td></tr>
+            <tr><td style="padding:6px 0; color:#888">Email</td><td><a href="mailto:${email}" style="color:#f0806b">${email}</a></td></tr>
+            ${telephone ? `<tr><td style="padding:6px 0; color:#888">Téléphone</td><td>${telephone}</td></tr>` : ''}
+            <tr><td style="padding:6px 0; color:#888">Effectif</td><td>${effectif || '–'}</td></tr>
+            <tr><td style="padding:6px 0; color:#888">Intervention</td><td>${besoin || '–'}</td></tr>
+            <tr><td style="padding:6px 0; color:#888">Format</td><td>${format || '–'}</td></tr>
+          </table>
+          ${message ? `<div style="margin-top:16px; background:white; padding:16px; border-radius:8px; font-size:14px; line-height:1.6">${message}</div>` : ''}
+        </div>
+      </div>
+    `,
+  })
+}
+
+module.exports = {
+  sendConfirmationToClient,
+  sendNotificationToSophro,
+  sendEntrepriseConfirmation,
+  sendEntrepriseNotification,
+}
