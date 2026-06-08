@@ -81,20 +81,35 @@ export default function Avis() {
   const [total,   setTotal]     = useState<number | null>(null)
   const [current, setCurrent]   = useState(0)
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
+  const placeId = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID   || 'ChIJR2xafuDr9EcRRioXLswDybg'
+  const apiKey  = process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY || ''
 
   useEffect(() => {
-    fetch(`${backendUrl}/api/reviews`)
+    if (!apiKey) return // pas de clé → fallback statique
+    const url =
+      `https://maps.googleapis.com/maps/api/place/details/json` +
+      `?place_id=${placeId}` +
+      `&fields=reviews%2Crating%2Cuser_ratings_total` +
+      `&language=fr` +
+      `&reviews_sort=newest` +
+      `&key=${apiKey}`
+
+    fetch(url)
       .then(r => r.json())
       .then(data => {
-        if (data.reviews && data.reviews.length > 0) {
-          setReviews(data.reviews)
-          if (data.rating) setRating(data.rating)
-          if (data.total)  setTotal(data.total)
-        }
+        if (data.status !== 'OK' || !data.result?.reviews?.length) return
+        setReviews(data.result.reviews.map((r: any) => ({
+          author: r.author_name,
+          photo:  r.profile_photo_url || null,
+          rating: r.rating,
+          date:   r.relative_time_description,
+          text:   r.text,
+        })))
+        if (data.result.rating)              setRating(data.result.rating)
+        if (data.result.user_ratings_total)  setTotal(data.result.user_ratings_total)
       })
       .catch(() => { /* silently keep fallback */ })
-  }, [backendUrl])
+  }, [apiKey, placeId])
 
   const total_reviews = total ?? reviews.length
   const displayRating = rating ?? 5
