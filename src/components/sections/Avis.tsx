@@ -2,45 +2,6 @@
 
 import { useState, useEffect } from 'react'
 
-// Avis statiques — affichés si l'API Google Places n'est pas encore configurée
-const FALLBACK = [
-  {
-    author: 'Sophie M.',
-    photo:  null,
-    rating: 5,
-    date:   'il y a 3 mois',
-    text:   "Une expérience vraiment transformatrice. Laetitia crée un espace de confiance où l'on se sent libre d'explorer. J'ai retrouvé une clarté que je n'avais plus depuis longtemps.",
-  },
-  {
-    author: 'Thomas R.',
-    photo:  null,
-    rating: 5,
-    date:   'il y a 4 mois',
-    text:   "J'ai commencé les séances de sophrologie dans un moment de grand stress professionnel. Les outils appris sont concrets, applicables au quotidien. Je recommande vivement.",
-  },
-  {
-    author: 'Claire D.',
-    photo:  null,
-    rating: 5,
-    date:   'il y a 5 mois',
-    text:   "Laetitia est à la fois bienveillante et très professionnelle. Le coaching m'a aidée à prendre une décision importante avec beaucoup plus de sérénité. Merci !",
-  },
-  {
-    author: 'Julien P.',
-    photo:  null,
-    rating: 5,
-    date:   'il y a 6 mois',
-    text:   "Les séances de sophrologie en groupe que propose Laetitia sont un vrai moment de ressourcement. On repart toujours plus léger, avec des techniques simples et efficaces.",
-  },
-  {
-    author: 'Marie-Hélène B.',
-    photo:  null,
-    rating: 5,
-    date:   'il y a 7 mois',
-    text:   "Un accompagnement sur mesure, Laetitia prend le temps d'écouter et d'adapter chaque séance. La sophrologie caycédienne m'a vraiment aidée à mieux dormir.",
-  },
-]
-
 type Review = {
   author: string
   photo:  string | null
@@ -76,16 +37,16 @@ function Avatar({ photo, name }: { photo: string | null; name: string }) {
 }
 
 export default function Avis() {
-  const [reviews, setReviews]   = useState<Review[]>(FALLBACK)
-  const [rating,  setRating]    = useState<number | null>(null)
-  const [total,   setTotal]     = useState<number | null>(null)
-  const [current, setCurrent]   = useState(0)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [rating,  setRating]  = useState<number | null>(null)
+  const [total,   setTotal]   = useState<number | null>(null)
+  const [current, setCurrent] = useState(0)
 
   const placeId = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID   || 'ChIJR2xafuDr9EcRRioXLswDybg'
   const apiKey  = process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY || ''
 
   useEffect(() => {
-    if (!apiKey) return // pas de clé → fallback statique
+    if (!apiKey) return
     const url =
       `https://maps.googleapis.com/maps/api/place/details/json` +
       `?place_id=${placeId}` +
@@ -105,18 +66,18 @@ export default function Avis() {
           date:   r.relative_time_description,
           text:   r.text,
         })))
-        if (data.result.rating)              setRating(data.result.rating)
-        if (data.result.user_ratings_total)  setTotal(data.result.user_ratings_total)
+        if (data.result.rating)             setRating(data.result.rating)
+        if (data.result.user_ratings_total) setTotal(data.result.user_ratings_total)
       })
-      .catch(() => { /* silently keep fallback */ })
+      .catch(() => {})
   }, [apiKey, placeId])
 
-  const total_reviews = total ?? reviews.length
-  const displayRating = rating ?? 5
+  // Rien à afficher tant que les avis ne sont pas chargés
+  if (reviews.length === 0) return null
+
   const count = reviews.length
   const prev  = () => setCurrent(c => (c - 1 + count) % count)
   const next  = () => setCurrent(c => (c + 1) % count)
-
   const visible = [
     (current - 1 + count) % count,
     current,
@@ -126,15 +87,13 @@ export default function Avis() {
   return (
     <section className="section-padding bg-rose-pastel/10 overflow-hidden">
       <div className="container-max">
-        {/* Titre */}
         <div className="text-center mb-12">
           <p className="text-rose-saumon text-xs font-semibold tracking-widest uppercase mb-3">Témoignages</p>
           <h2 className="text-4xl md:text-5xl text-texte mb-2">Ils témoignent</h2>
           <div className="flex items-center justify-center gap-2 mt-3">
-            <Stars n={Math.round(displayRating)} />
-            <span className="text-texte/60 text-sm">{displayRating}/5 · {total_reviews} avis</span>
-            {/* Logo Google */}
-            <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="currentColor">
+            <Stars n={Math.round(rating ?? 5)} />
+            <span className="text-texte/60 text-sm">{rating ?? 5}/5 · {total ?? count} avis</span>
+            <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -149,15 +108,10 @@ export default function Avis() {
           {visible.map((idx, pos) => {
             const a = reviews[idx]
             return (
-              <div
-                key={idx}
-                onClick={() => setCurrent(idx)}
+              <div key={idx} onClick={() => setCurrent(idx)}
                 className={`bg-blanc-casse rounded-2xl p-6 cursor-pointer transition-all duration-300 ${
-                  pos === 1
-                    ? 'shadow-lg scale-[1.03] border border-rose-pastel/40'
-                    : 'opacity-60 hover:opacity-80 shadow-sm'
-                }`}
-              >
+                  pos === 1 ? 'shadow-lg scale-[1.03] border border-rose-pastel/40' : 'opacity-60 hover:opacity-80 shadow-sm'
+                }`}>
                 <Stars n={a.rating} />
                 <p className="text-texte/75 text-sm leading-relaxed mt-4 mb-5 italic line-clamp-5">"{a.text}"</p>
                 <div className="flex items-center gap-2">
@@ -195,14 +149,12 @@ export default function Avis() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
-
           <div className="flex gap-2">
             {reviews.map((_, i) => (
               <button key={i} onClick={() => setCurrent(i)}
                 className={`rounded-full transition-all duration-300 ${i === current ? 'w-6 h-2 bg-rose-saumon' : 'w-2 h-2 bg-rose-pastel/50'}`} />
             ))}
           </div>
-
           <button onClick={next} aria-label="Suivant"
             className="w-10 h-10 rounded-full border border-rose-pastel/40 flex items-center justify-center hover:border-rose-saumon hover:text-rose-saumon transition-colors text-texte/50">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -211,14 +163,9 @@ export default function Avis() {
           </button>
         </div>
 
-        {/* Lien Google My Business */}
         <p className="text-center mt-6 text-xs text-texte/40">
-          <a
-            href="https://g.page/r/ChIJR2xafuDr9EcRRioXLswDybg/review"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-rose-saumon transition-colors underline underline-offset-2"
-          >
+          <a href="https://g.page/r/ChIJR2xafuDr9EcRRioXLswDybg/review" target="_blank" rel="noopener noreferrer"
+            className="hover:text-rose-saumon transition-colors underline underline-offset-2">
             Voir tous les avis sur Google →
           </a>
         </p>
