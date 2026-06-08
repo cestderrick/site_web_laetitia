@@ -34,6 +34,9 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_r, f, cb) => f.mimetype.startsWith('image/') ? cb(null, true) : cb(new Error('Image uniquement'))
 })
 
+// ── VERIFY ───────────────────────────────────────────────────────────────────
+router.get('/verify', requireAdmin, (_req, res) => res.json({ ok: true }))
+
 // ── SLOTS ─────────────────────────────────────────────────────────────────────
 
 // GET /api/admin/slots  (admin)

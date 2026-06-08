@@ -15,7 +15,7 @@ export default function AdminLogin({ onLogin }: { onLogin: (key: string) => void
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`${BACKEND}/api/admin/slots-config`, {
+      const res = await fetch(`${BACKEND}/api/admin/verify`, {
         headers: { 'x-admin-key': key },
       })
       if (res.status === 401) {
