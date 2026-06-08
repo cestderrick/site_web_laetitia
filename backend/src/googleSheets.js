@@ -163,7 +163,61 @@ async function initContentIfEmpty(defaultContent) {
   }
 }
 
+// ── Reviews ───────────────────────────────────────────────────────────────────
+// Colonnes : id | author | rating | date | text | createdAt
+
+const REVIEWS_RANGE  = 'reviews!A:F'
+const REVIEWS_HEADER = ['id', 'author', 'rating', 'date', 'text', 'createdAt']
+
+function rowToReview(row) {
+  const [id, author, rating, date, text, createdAt] = row
+  return { id, author, rating: Number(rating), date, text, createdAt }
+}
+
+async function getReviews() {
+  const sheets = getSheetsClient()
+  const res    = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: REVIEWS_RANGE })
+  const rows   = res.data.values || []
+  if (rows.length <= 1) return []
+  return rows.slice(1).map(rowToReview)
+}
+
+async function addReview(review) {
+  const sheets = getSheetsClient()
+  const check  = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'reviews!A1:F1' })
+  if (!check.data.values || check.data.values.length === 0) {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: SHEET_ID, range: 'reviews!A1',
+      valueInputOption: 'RAW',
+      requestBody: { values: [REVIEWS_HEADER] },
+    })
+  }
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID, range: REVIEWS_RANGE,
+    valueInputOption: 'RAW',
+    requestBody: { values: [[review.id, review.author, review.rating, review.date, review.text, new Date().toISOString()]] },
+  })
+}
+
+async function deleteReview(id) {
+  const sheets  = getSheetsClient()
+  const res     = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: REVIEWS_RANGE })
+  const rows    = res.data.values || []
+  const idx     = rows.findIndex((r, i) => i > 0 && r[0] === id)
+  if (idx === -1) throw new Error(`Avis ${id} introuvable`)
+
+  const meta    = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID })
+  const sheet   = meta.data.sheets.find(s => s.properties.title === 'reviews')
+  const sheetId = sheet.properties.sheetId
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: SHEET_ID,
+    requestBody: { requests: [{ deleteDimension: { range: { sheetId, dimension: 'ROWS', startIndex: idx, endIndex: idx + 1 } } }] },
+  })
+}
+
 module.exports = {
   getAllSlots, getAvailableSlots, addSlots, updateSlotRow, deleteSlotRow,
   getContent, setContent, initContentIfEmpty,
+  getReviews, addReview, deleteReview,
 }

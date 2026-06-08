@@ -2,14 +2,22 @@ name: Rebuild quotidien (avis Google)
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # tous les jours à 4h du matin (UTC)
-  workflow_dispatch:       # permet aussi de lancer manuellement depuis GitHub
+    - cron: '0 4 * * *'  # tous les jours à 4h UTC (6h heure française en été)
+  workflow_dispatch:       # lancement manuel depuis GitHub Actions
 
 jobs:
   redeploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Déclencher le redéploiement Render
+      - name: Réveiller le backend Render
+        run: |
+          echo "Ping du backend pour sortir de veille..."
+          curl -s "${{ secrets.RENDER_BACKEND_URL }}/health" -o /dev/null -w "Backend status: %{http_code}\n" || true
+
+      - name: Attendre que le backend soit prêt
+        run: sleep 40
+
+      - name: Déclencher le redéploiement du frontend
         run: |
           curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}" \
-            -o /dev/null -w "HTTP status: %{http_code}\n"
+            -o /dev/null -w "Deploy hook status: %{http_code}\n"

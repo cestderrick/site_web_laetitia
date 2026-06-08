@@ -4,8 +4,9 @@ import { useState } from 'react'
 import AdminLogin    from '@/components/admin/AdminLogin'
 import AdminSlots    from '@/components/admin/AdminSlots'
 import AdminContent  from '@/components/admin/AdminContent'
+import AdminReviews  from '@/components/admin/AdminReviews'
 
-type Tab = 'slots' | 'content'
+type Tab = 'slots' | 'content' | 'reviews'
 
 export default function AdminPage() {
   const [key,     setKey]     = useState<string | null>(null)
@@ -33,8 +34,9 @@ export default function AdminPage() {
       <div className="border-b border-rose-pastel/30 bg-white px-6">
         <nav className="flex gap-1 max-w-5xl mx-auto">
           {([
-            { id: 'slots',   label: '📅 Créneaux & Types de séance' },
+            { id: 'slots',   label: '📅 Créneaux' },
             { id: 'content', label: '✏️ Textes & Images' },
+            { id: 'reviews', label: '⭐ Avis' },
           ] as { id: Tab; label: string }[]).map(t => (
             <button
               key={t.id}
@@ -55,6 +57,7 @@ export default function AdminPage() {
       <main className="max-w-5xl mx-auto px-6 py-10">
         {tab === 'slots'   && <AdminSlots   adminKey={key} />}
         {tab === 'content' && <AdminContent adminKey={key} />}
+        {tab === 'reviews' && <AdminReviews adminKey={key} />}
       </main>
     </div>
   )

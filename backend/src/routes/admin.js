@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid')
 const {
   getAllSlots, addSlots, updateSlotRow, deleteSlotRow,
   getContent, setContent,
+  getReviews, addReview, deleteReview,
 } = require('../googleSheets')
 
 const router     = express.Router()
@@ -146,6 +147,41 @@ router.put('/content', requireAdmin, async (req, res) => {
 router.post('/upload', requireAdmin, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Aucun fichier reçu.' })
   res.json({ success: true, url: `/uploads/${req.file.filename}` })
+})
+
+// ── REVIEWS ───────────────────────────────────────────────────────────────────
+
+// GET /api/admin/reviews  (public — lu aussi par le build script)
+router.get('/reviews', async (_req, res) => {
+  try {
+    const reviews = await getReviews()
+    res.json({ reviews })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// POST /api/admin/reviews  (admin)
+router.post('/reviews', requireAdmin, async (req, res) => {
+  try {
+    const { author, rating, date, text } = req.body
+    if (!author || !rating || !text) return res.status(400).json({ error: 'Champs requis manquants.' })
+    const review = { id: uuidv4(), author, rating: Number(rating), date: date || '', text }
+    await addReview(review)
+    res.json({ success: true, review })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// DELETE /api/admin/reviews/:id  (admin)
+router.delete('/reviews/:id', requireAdmin, async (req, res) => {
+  try {
+    await deleteReview(req.params.id)
+    res.json({ success: true })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
 })
 
 module.exports = { router, requireAdmin }

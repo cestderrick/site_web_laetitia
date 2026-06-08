@@ -1,58 +1,51 @@
 /**
- * Script exécuté avant `next build` pour récupérer les avis Google Places
- * et les stocker dans public/reviews.json (fichier statique servi par le site).
+ * Script exécuté avant `next build`.
+ * Récupère les avis depuis le backend (Google Sheets) et les écrit dans public/reviews.json.
  *
- * Variables d'env nécessaires (Service 1 sur Render) :
- *   NEXT_PUBLIC_GOOGLE_PLACE_ID   — Place ID Google
- *   GOOGLE_PLACES_API_KEY         — Clé API Places (pas besoin de NEXT_PUBLIC ici)
+ * Variable d'env nécessaire (Service 1 sur Render) :
+ *   NEXT_PUBLIC_BACKEND_URL — URL du backend (ex: https://pose-backend.onrender.com)
  */
 
 import fs   from 'fs'
 import path from 'path'
 
-const PLACE_ID = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID || 'ChIJR2xafuDr9EcRRioXLswDybg'
-const API_KEY  = process.env.GOOGLE_PLACES_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY || ''
-
+const BACKEND  = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
 const OUT_FILE = path.join(process.cwd(), 'public', 'reviews.json')
 
-if (!API_KEY) {
-  console.log('⚠️  Aucune clé Google Places — reviews.json ignoré.')
-  process.exit(0)
+// Fonction fetch avec retry pour gérer le cold start du backend Render
+async function fetchWithRetry(url, retries = 3, delayMs = 10000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
+      if (res.ok) return res
+      throw new Error(`HTTP ${res.status}`)
+    } catch (err) {
+      if (i < retries - 1) {
+        console.log(`⏳ Backend pas encore prêt, retry dans ${delayMs / 1000}s… (${i + 1}/${retries})`)
+        await new Promise(r => setTimeout(r, delayMs))
+      } else {
+        throw err
+      }
+    }
+  }
 }
 
-const url =
-  `https://maps.googleapis.com/maps/api/place/details/json` +
-  `?place_id=${PLACE_ID}` +
-  `&fields=reviews%2Crating%2Cuser_ratings_total` +
-  `&language=fr` +
-  `&reviews_sort=newest` +
-  `&key=${API_KEY}`
-
 try {
-  const res  = await fetch(url)
+  console.log(`📡 Récupération des avis depuis ${BACKEND}…`)
+  const res  = await fetchWithRetry(`${BACKEND}/api/admin/reviews`)
   const data = await res.json()
 
-  if (data.status !== 'OK') {
-    console.error('❌ Google Places error:', data.status, data.error_message || '')
-    process.exit(0) // ne pas bloquer le build
+  const reviews = data.reviews || []
+
+  if (reviews.length === 0) {
+    console.log('ℹ️  Aucun avis à publier — reviews.json non généré.')
+    process.exit(0)
   }
 
-  const payload = {
-    reviews: (data.result.reviews || []).map(r => ({
-      author: r.author_name,
-      photo:  r.profile_photo_url || null,
-      rating: r.rating,
-      date:   r.relative_time_description,
-      text:   r.text,
-    })),
-    rating: data.result.rating        || null,
-    total:  data.result.user_ratings_total || null,
-    fetchedAt: new Date().toISOString(),
-  }
-
+  const payload = { reviews, fetchedAt: new Date().toISOString() }
   fs.writeFileSync(OUT_FILE, JSON.stringify(payload, null, 2), 'utf-8')
-  console.log(`✅ ${payload.reviews.length} avis Google écrits dans public/reviews.json`)
+  console.log(`✅ ${reviews.length} avis écrits dans public/reviews.json`)
 } catch (err) {
-  console.error('❌ Erreur fetch-reviews:', err.message)
+  console.log(`⚠️  Impossible de récupérer les avis (${err.message}) — section masquée.`)
   process.exit(0) // ne pas bloquer le build
 }
