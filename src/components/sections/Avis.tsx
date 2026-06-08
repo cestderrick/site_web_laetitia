@@ -80,7 +80,7 @@ export default function Avis() {
   ]
 
   return (
-    <section className="section-padding bg-rose-pastel/10 overflow-hidden">
+    <section id="avis" className="section-padding bg-rose-pastel/10 overflow-hidden">
       <div className="container-max">
         <div className="text-center mb-12">
           <p className="text-rose-saumon text-xs font-semibold tracking-widest uppercase mb-3">Témoignages</p>
@@ -159,7 +159,7 @@ export default function Avis() {
         </div>
 
         <p className="text-center mt-6 text-xs text-texte/40">
-          <a href="https://g.page/r/ChIJR2xafuDr9EcRRioXLswDybg/review" target="_blank" rel="noopener noreferrer"
+          <a href="https://www.google.com/maps/place/?q=place_id:ChIJR2xafuDr9EcRRioXLswDybg" target="_blank" rel="noopener noreferrer"
             className="hover:text-rose-saumon transition-colors underline underline-offset-2">
             Voir tous les avis sur Google →
           </a>
