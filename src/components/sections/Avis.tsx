@@ -10,6 +10,20 @@ type Review = {
   text:   string
 }
 
+function relativeDate(iso: string): string {
+  try {
+    const diff = Date.now() - new Date(iso).getTime()
+    const days = Math.floor(diff / 86400000)
+    if (days < 7)  return days <= 1 ? "il y a 1 jour" : `il y a ${days} jours`
+    const weeks = Math.floor(days / 7)
+    if (weeks < 5) return weeks <= 1 ? "il y a 1 semaine" : `il y a ${weeks} semaines`
+    const months = Math.floor(days / 30)
+    if (months < 12) return months <= 1 ? "il y a 1 mois" : `il y a ${months} mois`
+    const years = Math.floor(days / 365)
+    return years <= 1 ? "il y a 1 an" : `il y a ${years} ans`
+  } catch { return iso }
+}
+
 function Stars({ n }: { n: number }) {
   return (
     <div className="flex gap-0.5">

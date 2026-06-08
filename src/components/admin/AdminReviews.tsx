@@ -31,7 +31,7 @@ export default function AdminReviews({ adminKey }: { adminKey: string }) {
   const [error,   setError]   = useState('')
   const [saving,  setSaving]  = useState(false)
 
-  const [form, setForm] = useState({ author: '', rating: 5, date: '', text: '' })
+  const [form, setForm] = useState({ author: '', rating: 5, offsetValue: '1', offsetUnit: 'mois', text: '' })
 
   const headers = { 'Content-Type': 'application/json', 'x-admin-key': adminKey }
 
@@ -56,12 +56,19 @@ export default function AdminReviews({ adminKey }: { adminKey: string }) {
     setSaving(true)
     setError('')
     try {
+      // Calculer la date ISO depuis l'offset
+      const d = new Date()
+      const n = parseInt(form.offsetValue) || 1
+      if (form.offsetUnit === 'jours')    d.setDate(d.getDate() - n)
+      if (form.offsetUnit === 'semaines') d.setDate(d.getDate() - n * 7)
+      if (form.offsetUnit === 'mois')     d.setMonth(d.getMonth() - n)
+
       const r = await fetch(`${BACKEND}/api/admin/reviews`, {
         method: 'POST', headers,
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, date: d.toISOString() }),
       })
       if (!r.ok) throw new Error((await r.json()).error)
-      setForm({ author: '', rating: 5, date: '', text: '' })
+      setForm({ author: '', rating: 5, offsetValue: '1', offsetUnit: 'mois', text: '' })
       await load()
     } catch (err: any) {
       setError(err.message || "Erreur lors de l'ajout.")
@@ -94,10 +101,21 @@ export default function AdminReviews({ adminKey }: { adminKey: string }) {
                 className="w-full border border-rose-pastel/40 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-rose-saumon" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-texte/60 mb-1">Date (texte libre)</label>
-              <input value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                placeholder="ex : il y a 2 semaines"
-                className="w-full border border-rose-pastel/40 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-rose-saumon" />
+              <label className="block text-xs font-medium text-texte/60 mb-1">Date de l'avis</label>
+              <div className="flex gap-2">
+                <input type="number" min="1" max="99"
+                  value={form.offsetValue}
+                  onChange={e => setForm(f => ({ ...f, offsetValue: e.target.value }))}
+                  className="w-20 border border-rose-pastel/40 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-rose-saumon" />
+                <select value={form.offsetUnit}
+                  onChange={e => setForm(f => ({ ...f, offsetUnit: e.target.value }))}
+                  className="flex-1 border border-rose-pastel/40 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-rose-saumon bg-white">
+                  <option value="jours">jours</option>
+                  <option value="semaines">semaines</option>
+                  <option value="mois">mois</option>
+                </select>
+              </div>
+              <p className="text-texte/40 text-xs mt-1">Nombre de jours/semaines/mois depuis la date de l'avis</p>
             </div>
           </div>
           <div>
