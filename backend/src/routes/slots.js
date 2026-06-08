@@ -1,12 +1,11 @@
 const express = require('express')
-const { getAvailableSlots } = require('../googleCalendar')
+const { getAvailableSlots } = require('../googleSheets')
 const router = express.Router()
 
-// GET /api/slots?days=30
-router.get('/', async (req, res) => {
+// GET /api/slots  — créneaux disponibles pour le frontend RDV
+router.get('/', async (_req, res) => {
   try {
-    const days  = parseInt(req.query.days || '30', 10)
-    const slots = await getAvailableSlots(days)
+    const slots = await getAvailableSlots()
     res.json({ slots })
   } catch (err) {
     console.error('Erreur slots:', err.message)

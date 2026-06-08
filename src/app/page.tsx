@@ -4,6 +4,7 @@ import QuiSuisJe      from '@/components/sections/QuiSuisJe'
 import Vision         from '@/components/sections/Vision'
 import Methodes       from '@/components/sections/Methodes'
 import QuiSection     from '@/components/sections/QuiSection'
+import Avis           from '@/components/sections/Avis'
 import ContactSection from '@/components/sections/ContactSection'
 import Footer         from '@/components/Footer'
 
@@ -22,7 +23,9 @@ export default function Home() {
         <Methodes />
         {/* 5. Pour qui ? (population cible) */}
         <QuiSection />
-        {/* 6. Contact */}
+        {/* 6. Avis Google */}
+        <Avis />
+        {/* 7. Contact */}
         <ContactSection />
       </main>
       <Footer />

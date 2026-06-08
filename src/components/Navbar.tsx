@@ -15,8 +15,9 @@ const navLinks = [
       { label: 'Sophrologie', href: '/#sophrologie' },
     ],
   },
-  { label: 'Qui ?',   href: '/#qui' },
-  { label: 'Contact', href: '/#contact' },
+  { label: 'Qui ?',        href: '/#qui' },
+  { label: 'Entreprises', href: '/entreprises' },
+  { label: 'Contact',     href: '/#contact' },
 ]
 
 export default function Navbar() {
