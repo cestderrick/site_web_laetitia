@@ -7,6 +7,48 @@ const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
 
 type Content = Record<string, Record<string, string>>
 
+const ENTREPRISES_DEFAULTS: Record<string, Record<string, string>> = {
+  entreprisesHero: {
+    accroche:  'Sophrologie & Coaching en entreprise',
+    titre1:    'Le bien-être de vos équipes,',
+    titre2:    'un investissement durable.',
+    sousTitre: "Des interventions sur mesure pour réduire le stress, renforcer la cohésion et améliorer la qualité de vie au travail — à Lyon, Giez et en visio.",
+  },
+  entreprisesBenefices: {
+    titre: 'Pourquoi investir dans le bien-être ?',
+    b1: "Réduction de l'absentéisme",
+    b2: "Regain d'énergie et de motivation",
+    b3: "Meilleure cohésion d'équipe",
+    b4: "Amélioration de la concentration",
+    b5: "Gestion du stress et des émotions",
+    b6: "Performance durable",
+  },
+  entreprisesOffres: {
+    titre:        'Des formats adaptés à vos besoins',
+    sousTitre:    "Chaque intervention est construite sur mesure après un échange préalable pour cerner vos enjeux et votre culture d'entreprise.",
+    offre1_titre: 'Ateliers sophrologie',
+    offre1_desc:  "Séances collectives de sophrologie pour apprendre à gérer le stress, retrouver de l'énergie et améliorer la concentration. Format ponctuel ou programme sur plusieurs semaines.",
+    offre1_d1: '1h à 1h30 par session',
+    offre1_d2: "Jusqu'à 12 participants",
+    offre1_d3: 'Présentiel ou visio',
+    offre2_titre: "Coaching d'équipe",
+    offre2_desc:  "Accompagnement collectif pour renforcer la cohésion, clarifier les objectifs communs et améliorer la communication au sein de l'équipe.",
+    offre2_d1: 'Demi-journée ou journée',
+    offre2_d2: 'Sur mesure selon vos enjeux',
+    offre2_d3: 'Présentiel ou visio',
+    offre3_titre: 'Programme bien-être',
+    offre3_desc:  "Programme clé en main combinant sophrologie, coaching individuel et ateliers thématiques pour ancrer durablement le bien-être dans votre entreprise.",
+    offre3_d1: 'Sur 4 à 12 semaines',
+    offre3_d2: 'Bilan initial & suivi',
+    offre3_d3: 'Rapport final inclus',
+    offre4_titre: 'Conférences & sensibilisation',
+    offre4_desc:  "Interventions ponctuelles sur des thématiques comme la gestion du stress, la prévention du burn-out ou la qualité de vie au travail.",
+    offre4_d1: '45 min à 1h30',
+    offre4_d2: 'Idéal pour séminaires',
+    offre4_d3: 'Support de présentation fourni',
+  },
+}
+
 const SECTIONS = [
   {
     key: 'hero',
@@ -129,7 +171,16 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
   useEffect(() => {
     fetch(`${BACKEND}/api/admin/content`, { headers: { 'x-admin-key': adminKey } })
       .then(r => r.json())
-      .then(setContent)
+      .then(data => {
+        // Pré-remplir les sections entreprises avec les valeurs par défaut si absentes du Sheet
+        const merged = { ...data }
+        for (const [key, defaults] of Object.entries(ENTREPRISES_DEFAULTS)) {
+          if (!merged[key] || Object.keys(merged[key]).length === 0) {
+            merged[key] = { ...defaults }
+          }
+        }
+        setContent(merged)
+      })
   }, [adminKey])
 
   const update = (section: string, field: string, value: string) => {
