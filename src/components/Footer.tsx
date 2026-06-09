@@ -93,8 +93,8 @@ export default function Footer() {
             <Image
               src="/logos/projiat-logo.png"
               alt="Projiat"
-              width={48}
-              height={48}
+              width={24}
+              height={24}
               className="object-contain opacity-40 hover:opacity-70 transition-opacity"
               style={{ filter: 'brightness(0) invert(1)' }}
             />
