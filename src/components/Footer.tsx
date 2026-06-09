@@ -81,9 +81,25 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-blanc-casse/10 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-blanc-casse/40">
+        <div className="border-t border-blanc-casse/10 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-blanc-casse/40">
           <p>© {year} P.ose – Laetitia Chastel. Tous droits réservés.</p>
-          <p>Sophrologie & Coaching · Lyon 2e · 29 place Bellecour</p>
+          <a
+            href="https://projiat.fr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 hover:text-blanc-casse/70 transition-colors"
+          >
+            <span>Site développé par</span>
+            <Image
+              src="/logos/projiat-logo.png"
+              alt="Projiat"
+              width={28}
+              height={28}
+              className="object-contain opacity-40 hover:opacity-70 transition-opacity"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
+            <span>Projiat</span>
+          </a>
         </div>
       </div>
     </footer>
