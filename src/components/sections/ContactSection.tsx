@@ -33,7 +33,7 @@ export default function ContactSection() {
   }
 
   return (
-    <section id="contact" className="section-padding bg-blanc-casse">
+    <section id="contact" className="section-padding bg-blanc-casse scroll-mt-24">
       <div className="container-max">
         {/* Titre */}
         <div className="text-center mb-16">
