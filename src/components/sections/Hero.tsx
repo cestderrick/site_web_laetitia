@@ -54,7 +54,7 @@ export default function Hero() {
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-center sm:justify-center">
           <Link href="/rdv" className="btn-primary">Prendre rendez-vous</Link>
           <a href="#vision" className="btn-outline">Découvrir l&apos;approche</a>
         </div>
