@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useContent, cs, applyStyle, imgSrc } from '@/hooks/useContent'
+import { useContent, cs, applyStyle, imgSrc, getAlign } from '@/hooks/useContent'
 
 const S = 'hero'
 const D = {
@@ -28,7 +28,7 @@ export default function Hero() {
       <div className="absolute top-0 right-0 w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-vert-pastel/30 rounded-full -translate-y-1/3 translate-x-1/3 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[30vw] h-[30vw] max-w-[400px] max-h-[400px] bg-rose-pastel/30 rounded-full translate-y-1/3 -translate-x-1/4 blur-3xl pointer-events-none" />
 
-      <div className="container-max section-padding text-center relative z-10">
+      <div className="container-max section-padding text-center relative z-10" style={getAlign(content, S)}>
 
         <p className="text-rose-saumon text-sm font-medium tracking-widest uppercase mb-6"
            style={applyStyle(content, S, 'accroche')}>

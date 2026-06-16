@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useContent, cs, applyStyle } from '@/hooks/useContent'
+import { useContent, cs, applyStyle, getAlign } from '@/hooks/useContent'
 
 const DC = {
   titre:    'Coaching',
@@ -69,7 +69,7 @@ export default function Methodes() {
               id={m.id}
               className={`rounded-3xl border ${m.border} ${m.bg} p-8 md:p-10 flex flex-col gap-6`}
             >
-              <div className="text-center">
+              <div className="text-center" style={getAlign(content, m.section)}>
                 <span className="text-4xl mb-4 block">{m.icone}</span>
                 <p className="text-rose-saumon text-xs font-semibold tracking-widest uppercase mb-1">Méthode</p>
                 <h3 className="text-3xl text-texte mb-1" style={applyStyle(content, m.section, 'titre')}>

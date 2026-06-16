@@ -50,6 +50,8 @@ function Avatar({ photo, name }: { photo: string | null; name: string }) {
   )
 }
 
+const GOOGLE_URL = 'https://www.google.com/maps/place/?q=place_id:ChIJR2xafuDr9EcRRioXLswDybg'
+
 export default function Avis() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [rating,  setRating]  = useState<number | null>(null)
@@ -103,9 +105,13 @@ export default function Avis() {
           {visible.map((idx, pos) => {
             const a = reviews[idx]
             return (
-              <div key={idx} onClick={() => setCurrent(idx)}
-                className={`bg-blanc-casse rounded-2xl p-6 cursor-pointer transition-all duration-300 ${
-                  pos === 1 ? 'shadow-lg scale-[1.03] border border-rose-pastel/40' : 'opacity-60 hover:opacity-80 shadow-sm'
+              <a key={idx}
+                href={GOOGLE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => { if (pos !== 1) { e.preventDefault(); setCurrent(idx) } }}
+                className={`bg-blanc-casse rounded-2xl p-6 cursor-pointer transition-all duration-300 block ${
+                  pos === 1 ? 'shadow-lg scale-[1.03] border border-rose-pastel/40 hover:shadow-xl' : 'opacity-60 hover:opacity-80 shadow-sm'
                 }`}>
                 <Stars n={a.rating} />
                 <p className="text-texte/75 text-sm leading-relaxed mt-4 mb-5 italic line-clamp-5">"{a.text}"</p>
@@ -116,14 +122,15 @@ export default function Avis() {
                     <p className="text-texte/40 text-xs mt-0.5">{a.date}</p>
                   </div>
                 </div>
-              </div>
+              </a>
             )
           })}
         </div>
 
         {/* Mobile : 1 carte */}
         <div className="md:hidden mb-8">
-          <div className="bg-blanc-casse rounded-2xl p-6 shadow-md border border-rose-pastel/30">
+          <a href={GOOGLE_URL} target="_blank" rel="noopener noreferrer"
+            className="bg-blanc-casse rounded-2xl p-6 shadow-md border border-rose-pastel/30 hover:shadow-lg transition-shadow block">
             <Stars n={reviews[current].rating} />
             <p className="text-texte/75 text-sm leading-relaxed mt-4 mb-5 italic">"{reviews[current].text}"</p>
             <div className="flex items-center gap-2">
@@ -133,7 +140,7 @@ export default function Avis() {
                 <p className="text-texte/40 text-xs mt-0.5">{reviews[current].date}</p>
               </div>
             </div>
-          </div>
+          </a>
         </div>
 
         {/* Contrôles */}
@@ -159,7 +166,7 @@ export default function Avis() {
         </div>
 
         <p className="text-center mt-6 text-xs text-texte/40">
-          <a href="https://www.google.com/maps/place/?q=place_id:ChIJR2xafuDr9EcRRioXLswDybg" target="_blank" rel="noopener noreferrer"
+          <a href={GOOGLE_URL} target="_blank" rel="noopener noreferrer"
             className="hover:text-rose-saumon transition-colors underline underline-offset-2">
             Voir tous les avis sur Google →
           </a>

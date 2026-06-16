@@ -1,6 +1,6 @@
 'use client'
 
-import { useContent, cs, applyStyle } from '@/hooks/useContent'
+import { useContent, cs, applyStyle, getAlign } from '@/hooks/useContent'
 
 const S = 'vision'
 const D = {
@@ -32,7 +32,7 @@ export default function Vision() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6 text-texte/80 text-lg leading-relaxed">
+          <div className="space-y-6 text-texte/80 text-lg leading-relaxed" style={getAlign(content, S)}>
             <p>{texte1}</p>
             <p>{texte2}</p>
             <p>

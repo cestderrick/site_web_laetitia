@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
+import { invalidateContent } from '@/hooks/useContent'
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
 
@@ -101,6 +102,7 @@ const SECTIONS = [
     key: 'hero',
     label: '🏠 Accueil (Hero)',
     hasPhoto: true,
+    hasAlign: true,
     photoLabel: 'Photo hero (optionnelle, entre le texte et les boutons)',
     fields: [
       { key: 'accroche',  label: 'Accroche (petit texte coloré)', hasStyle: true },
@@ -113,6 +115,7 @@ const SECTIONS = [
     key: 'quiSuisJe',
     label: '👤 Qui suis-je ?',
     hasPhoto: true,
+    hasAlign: true,
     fields: [
       { key: 'titre',  label: 'Titre (nom affiché)',  hasStyle: true },
       { key: 'texte1', label: 'Paragraphe 1', multiline: true },
@@ -124,6 +127,7 @@ const SECTIONS = [
   {
     key: 'vision',
     label: '🌿 Vision',
+    hasAlign: true,
     fields: [
       { key: 'titre',      label: 'Titre',        hasStyle: true },
       { key: 'texte1',     label: 'Paragraphe 1', multiline: true },
@@ -134,6 +138,7 @@ const SECTIONS = [
   {
     key: 'coaching',
     label: '🎯 Coaching',
+    hasAlign: true,
     fields: [
       { key: 'titre',    label: 'Titre',      hasStyle: true },
       { key: 'accroche', label: 'Sous-titre', hasStyle: true },
@@ -143,6 +148,7 @@ const SECTIONS = [
   {
     key: 'sophrologie',
     label: '🌿 Sophrologie',
+    hasAlign: true,
     fields: [
       { key: 'titre',    label: 'Titre',      hasStyle: true },
       { key: 'accroche', label: 'Sous-titre', hasStyle: true },
@@ -201,6 +207,42 @@ const SECTIONS = [
     ],
   },
 ]
+
+// ── Composant AlignPicker ─────────────────────────────────────────────────────
+const ALIGNMENTS = [
+  { value: 'left',    label: '⬅', title: 'Gauche' },
+  { value: 'center',  label: '↔', title: 'Centré' },
+  { value: 'right',   label: '➡', title: 'Droite' },
+  { value: 'justify', label: '≡', title: 'Justifié' },
+]
+
+function AlignPicker({ sectionKey, content, update }: {
+  sectionKey: string
+  content: Content
+  update: (s: string, f: string, v: string) => void
+}) {
+  const cur = content[sectionKey]?.['_align'] || ''
+  return (
+    <div className="flex items-center gap-2 pt-3 pb-1">
+      <span className="text-xs text-texte/40">Alignement :</span>
+      {ALIGNMENTS.map(a => (
+        <button
+          key={a.value}
+          type="button"
+          title={a.title}
+          onClick={() => update(sectionKey, '_align', cur === a.value ? '' : a.value)}
+          className={`px-3 py-1 rounded-lg text-sm transition-all ${
+            cur === a.value
+              ? 'bg-rose-saumon text-white'
+              : 'bg-blanc-casse border border-rose-pastel/30 text-texte/50 hover:bg-rose-pastel/20'
+          }`}
+        >
+          {a.label} {a.title}
+        </button>
+      ))}
+    </div>
+  )
+}
 
 // ── Composant StylePicker ─────────────────────────────────────────────────────
 function StylePicker({
@@ -317,6 +359,7 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
       headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
       body: JSON.stringify(content),
     })
+    invalidateContent() // force les composants front à re-fetcher
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
     setLoading(false)
@@ -363,6 +406,11 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
 
           {openSection === section.key && (
             <div className="px-6 pb-6 space-y-4 border-t border-rose-pastel/20">
+
+              {/* Alignement */}
+              {section.hasAlign && (
+                <AlignPicker sectionKey={section.key} content={content} update={update} />
+              )}
 
               {/* Upload photo */}
               {section.hasPhoto && (
