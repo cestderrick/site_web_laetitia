@@ -7,6 +7,36 @@ const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
 
 type Content = Record<string, Record<string, string>>
 
+const ALL_DEFAULTS: Record<string, Record<string, string>> = {
+  hero: {
+    accroche:  'Sophrologie & Coaching à Lyon, Giez (Proche Annecy) et visio',
+    titre:     'Faire une pause pour mieux oser.',
+    sousTitre: "Un espace doux et bienveillant pour vous reconnecter à vous-même, traverser les transitions de vie et révéler vos ressources profondes.",
+  },
+  quiSuisJe: {
+    titre:  'Laetitia Chastel',
+    texte1: "Je m'appelle Laetitia, passionnée par l'humain et les parcours de vie. Je me forme au Coaching à la JBS Coaching et à la Sophrologie Caycédienne, dans la continuité d'un chemin déjà tourné vers l'accompagnement.",
+    texte2: "Mon goût pour l'écoute et le développement des potentiels s'est d'abord exprimé dans les Ressources Humaines et l'orientation professionnelle. J'y ai découvert combien l'accompagnement peut aider à traverser les transitions et à redonner du sens.",
+    texte3: "Chacune de mes expériences m'a rapprochée un peu plus de ce qui m'anime profondément : comprendre l'humain, créer du lien, révéler les ressources.",
+  },
+  vision: {
+    titre:     'Un accompagnement ancré dans le vivant',
+    texte1:    "Je crois profondément que chacun porte en lui les ressources nécessaires pour traverser les moments difficiles et se construire une vie qui lui ressemble.",
+    texte2:    "Mon rôle n'est pas de vous donner des réponses, mais de créer un espace de confiance où vous pouvez les trouver vous-même — à votre rythme, avec douceur et exigence.",
+    conviction: "Les périodes d'incertitude sont des opportunités de se reconnecter à ce qui compte vraiment.",
+  },
+  coaching: {
+    titre:    'Coaching',
+    accroche: "De l'intention à l'action",
+    texte:    "Le coaching est un espace de réflexion et d'action qui permet de mieux comprendre sa situation actuelle pour construire celle que l'on souhaite vivre.\n\nIl accompagne les périodes de transition, les prises de décision et les envies d'évolution, en aidant chacun à passer de l'intention à l'action.",
+  },
+  sophrologie: {
+    titre:    'Sophrologie',
+    accroche: 'Entraîner sa conscience',
+    texte:    "La Sophrologie Caycédienne, créée par le psychiatre et professeur Alfonso Caycedo, est une méthode d'accompagnement qui combine la respiration, le mouvement et les évocations positives afin d'amener du mieux-être.\n\nIl s'agit d'un entraînement de la conscience qui permet de développer la conscience de soi et d'activer ses propres ressources au quotidien.",
+  },
+}
+
 const ENTREPRISES_DEFAULTS: Record<string, Record<string, string>> = {
   entreprisesHero: {
     accroche:  'Sophrologie & Coaching en entreprise',
@@ -63,6 +93,7 @@ const SECTIONS = [
     key: 'quiSuisJe',
     label: '👤 Qui suis-je ?',
     fields: [
+      { key: 'titre',  label: 'Titre (nom affiché)' },
       { key: 'texte1', label: 'Paragraphe 1', multiline: true },
       { key: 'texte2', label: 'Paragraphe 2', multiline: true },
       { key: 'texte3', label: 'Paragraphe 3', multiline: true },
@@ -84,6 +115,7 @@ const SECTIONS = [
     key: 'coaching',
     label: '🎯 Coaching',
     fields: [
+      { key: 'titre',    label: 'Titre' },
       { key: 'accroche', label: 'Sous-titre' },
       { key: 'texte',    label: 'Texte', multiline: true },
     ],
@@ -92,6 +124,7 @@ const SECTIONS = [
     key: 'sophrologie',
     label: '🌿 Sophrologie',
     fields: [
+      { key: 'titre',    label: 'Titre' },
       { key: 'accroche', label: 'Sous-titre' },
       { key: 'texte',    label: 'Texte', multiline: true },
     ],
@@ -172,11 +205,15 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
     fetch(`${BACKEND}/api/admin/content`, { headers: { 'x-admin-key': adminKey } })
       .then(r => r.json())
       .then(data => {
-        // Pré-remplir les sections entreprises avec les valeurs par défaut si absentes du Sheet
+        // Pré-remplir toutes les sections avec les valeurs par défaut si absentes du Sheet
         const merged = { ...data }
-        for (const [key, defaults] of Object.entries(ENTREPRISES_DEFAULTS)) {
+        const allDefaults = { ...ALL_DEFAULTS, ...ENTREPRISES_DEFAULTS }
+        for (const [key, defaults] of Object.entries(allDefaults)) {
           if (!merged[key] || Object.keys(merged[key]).length === 0) {
             merged[key] = { ...defaults }
+          } else {
+            // Fusionner champ par champ pour ne pas écraser ce qui existe
+            merged[key] = { ...defaults, ...merged[key] }
           }
         }
         setContent(merged)
