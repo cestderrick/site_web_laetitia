@@ -8,9 +8,9 @@ const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
 export type ContentMap = Record<string, Record<string, string>>
 
 // Cache module-level : tous les composants partagent le même fetch
-let _cache: ContentMap | null = null
+let _cache:   ContentMap | null = null
 let _promise: Promise<ContentMap> | null = null
-const _listeners: Set<(c: ContentMap) => void> = new Set()
+let _ready    = false   // true dès que le premier fetch s'est terminé (succès ou erreur)
 
 function fetchContent(): Promise<ContentMap> {
   if (_cache) return Promise.resolve(_cache)
@@ -22,13 +22,13 @@ function fetchContent(): Promise<ContentMap> {
     })
     .then((data: ContentMap) => {
       _cache = data
-      _listeners.forEach(fn => fn(data))
-      _listeners.clear()
+      _ready = true
       return data
     })
     .catch(err => {
       console.warn('[useContent] fetch failed, using defaults.', err?.message)
       _promise = null
+      _ready = true
       return {} as ContentMap
     })
   return _promise
@@ -36,8 +36,9 @@ function fetchContent(): Promise<ContentMap> {
 
 /** Invalide le cache (utile après un save admin) */
 export function invalidateContent() {
-  _cache = null
+  _cache   = null
   _promise = null
+  _ready   = false
 }
 
 /** Hook React — retourne le contenu depuis le Sheet (avec fallback {} pendant le chargement) */
@@ -50,6 +51,19 @@ export function useContent(): ContentMap {
   }, [])
 
   return content
+}
+
+/**
+ * Retourne true une fois que le fetch initial est terminé.
+ * Permet d'éviter d'afficher les textes par défaut le temps du chargement.
+ */
+export function useContentReady(): boolean {
+  const [ready, setReady] = useState(_ready)
+  useEffect(() => {
+    if (_ready) { setReady(true); return }
+    fetchContent().then(() => setReady(true))
+  }, [])
+  return ready
 }
 
 /** Récupère une valeur texte, avec fallback */

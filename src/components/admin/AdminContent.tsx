@@ -60,9 +60,10 @@ const ALL_DEFAULTS: Record<string, Record<string, string>> = {
     accroche: 'Entraîner sa conscience',
     texte:    "La Sophrologie Caycédienne, créée par le psychiatre et professeur Alfonso Caycedo, est une méthode d'accompagnement qui combine la respiration, le mouvement et les évocations positives afin d'amener du mieux-être.\n\nIl s'agit d'un entraînement de la conscience qui permet de développer la conscience de soi et d'activer ses propres ressources au quotidien.",
   },
-}
-
-const ENTREPRISES_DEFAULTS: Record<string, Record<string, string>> = {
+  methodes: {
+    titre: 'Deux approches complémentaires',
+    label: 'Mes méthodes',
+  },
   entreprisesHero: {
     accroche:  'Sophrologie & Coaching en entreprise',
     titre1:    'Le bien-être de vos équipes,',
@@ -94,6 +95,13 @@ const ENTREPRISES_DEFAULTS: Record<string, Record<string, string>> = {
     offre4_desc:  "Interventions ponctuelles sur des thématiques comme la gestion du stress, la prévention du burn-out ou la qualité de vie au travail.",
     offre4_d1: '45 min à 1h30', offre4_d2: 'Idéal pour séminaires', offre4_d3: 'Support de présentation fourni',
   },
+  contact: {
+    adresse:   '29 place Bellecour, 69002 Lyon',
+    email:     'sophrocoachinglaetitia@gmail.com',
+    telephone: '06 64 43 87 47',
+    instagram: 'https://www.instagram.com/laeti.sophrocoach/',
+    linkedin:  'https://www.linkedin.com/in/laetitia-chastel/',
+  },
 }
 
 // ── Définition des sections ───────────────────────────────────────────────────
@@ -107,8 +115,7 @@ const SECTIONS = [
     fields: [
       { key: 'accroche',  label: 'Accroche (petit texte coloré)', hasStyle: true },
       { key: 'titre',     label: 'Titre principal',               hasStyle: true },
-      { key: 'sousTitre', label: 'Paragraphe intro', multiline: true, hasStyle: true },
-      { key: 'photo',     label: 'Photo (URL ou upload)' },
+      { key: 'sousTitre', label: 'Paragraphe intro',              hasStyle: true },
     ],
   },
   {
@@ -118,10 +125,9 @@ const SECTIONS = [
     hasAlign: true,
     fields: [
       { key: 'titre',  label: 'Titre (nom affiché)',  hasStyle: true },
-      { key: 'texte1', label: 'Paragraphe 1', multiline: true },
-      { key: 'texte2', label: 'Paragraphe 2', multiline: true },
-      { key: 'texte3', label: 'Paragraphe 3', multiline: true },
-      { key: 'photo',  label: 'Photo (URL ou upload)' },
+      { key: 'texte1', label: 'Paragraphe 1' },
+      { key: 'texte2', label: 'Paragraphe 2' },
+      { key: 'texte3', label: 'Paragraphe 3' },
     ],
   },
   {
@@ -130,8 +136,8 @@ const SECTIONS = [
     hasAlign: true,
     fields: [
       { key: 'titre',      label: 'Titre',        hasStyle: true },
-      { key: 'texte1',     label: 'Paragraphe 1', multiline: true },
-      { key: 'texte2',     label: 'Paragraphe 2', multiline: true },
+      { key: 'texte1',     label: 'Paragraphe 1' },
+      { key: 'texte2',     label: 'Paragraphe 2' },
       { key: 'conviction', label: 'Ma conviction' },
     ],
   },
@@ -142,7 +148,7 @@ const SECTIONS = [
     fields: [
       { key: 'titre',    label: 'Titre',      hasStyle: true },
       { key: 'accroche', label: 'Sous-titre', hasStyle: true },
-      { key: 'texte',    label: 'Texte', multiline: true },
+      { key: 'texte',    label: 'Texte' },
     ],
   },
   {
@@ -152,7 +158,15 @@ const SECTIONS = [
     fields: [
       { key: 'titre',    label: 'Titre',      hasStyle: true },
       { key: 'accroche', label: 'Sous-titre', hasStyle: true },
-      { key: 'texte',    label: 'Texte', multiline: true },
+      { key: 'texte',    label: 'Texte' },
+    ],
+  },
+  {
+    key: 'methodes',
+    label: '🔄 Section Méthodes (titre)',
+    fields: [
+      { key: 'label', label: 'Étiquette (ex : "Mes méthodes")' },
+      { key: 'titre', label: 'Titre de la section', hasStyle: true },
     ],
   },
   {
@@ -162,7 +176,7 @@ const SECTIONS = [
       { key: 'accroche',  label: 'Accroche',          hasStyle: true },
       { key: 'titre1',    label: 'Titre – ligne 1',   hasStyle: true },
       { key: 'titre2',    label: 'Titre – ligne 2',   hasStyle: true },
-      { key: 'sousTitre', label: 'Paragraphe intro',  multiline: true },
+      { key: 'sousTitre', label: 'Paragraphe intro' },
     ],
   },
   {
@@ -180,19 +194,19 @@ const SECTIONS = [
     label: '🎯 Entreprises – Offres',
     fields: [
       { key: 'titre',        label: 'Titre de la section',   hasStyle: true },
-      { key: 'sousTitre',    label: 'Sous-titre',            multiline: true },
+      { key: 'sousTitre',    label: 'Sous-titre' },
       { key: 'offre1_titre', label: 'Offre 1 – Titre',       hasStyle: true },
-      { key: 'offre1_desc',  label: 'Offre 1 – Description', multiline: true },
-      { key: 'offre1_d1',    label: 'Offre 1 – Détail 1' }, { key: 'offre1_d2', label: 'Offre 1 – Détail 2' }, { key: 'offre1_d3', label: 'Offre 1 – Détail 3' },
+      { key: 'offre1_desc',  label: 'Offre 1 – Description' },
+      { key: 'offre1_d1', label: 'Offre 1 – Détail 1' }, { key: 'offre1_d2', label: 'Offre 1 – Détail 2' }, { key: 'offre1_d3', label: 'Offre 1 – Détail 3' },
       { key: 'offre2_titre', label: 'Offre 2 – Titre',       hasStyle: true },
-      { key: 'offre2_desc',  label: 'Offre 2 – Description', multiline: true },
-      { key: 'offre2_d1',    label: 'Offre 2 – Détail 1' }, { key: 'offre2_d2', label: 'Offre 2 – Détail 2' }, { key: 'offre2_d3', label: 'Offre 2 – Détail 3' },
+      { key: 'offre2_desc',  label: 'Offre 2 – Description' },
+      { key: 'offre2_d1', label: 'Offre 2 – Détail 1' }, { key: 'offre2_d2', label: 'Offre 2 – Détail 2' }, { key: 'offre2_d3', label: 'Offre 2 – Détail 3' },
       { key: 'offre3_titre', label: 'Offre 3 – Titre',       hasStyle: true },
-      { key: 'offre3_desc',  label: 'Offre 3 – Description', multiline: true },
-      { key: 'offre3_d1',    label: 'Offre 3 – Détail 1' }, { key: 'offre3_d2', label: 'Offre 3 – Détail 2' }, { key: 'offre3_d3', label: 'Offre 3 – Détail 3' },
+      { key: 'offre3_desc',  label: 'Offre 3 – Description' },
+      { key: 'offre3_d1', label: 'Offre 3 – Détail 1' }, { key: 'offre3_d2', label: 'Offre 3 – Détail 2' }, { key: 'offre3_d3', label: 'Offre 3 – Détail 3' },
       { key: 'offre4_titre', label: 'Offre 4 – Titre',       hasStyle: true },
-      { key: 'offre4_desc',  label: 'Offre 4 – Description', multiline: true },
-      { key: 'offre4_d1',    label: 'Offre 4 – Détail 1' }, { key: 'offre4_d2', label: 'Offre 4 – Détail 2' }, { key: 'offre4_d3', label: 'Offre 4 – Détail 3' },
+      { key: 'offre4_desc',  label: 'Offre 4 – Description' },
+      { key: 'offre4_d1', label: 'Offre 4 – Détail 1' }, { key: 'offre4_d2', label: 'Offre 4 – Détail 2' }, { key: 'offre4_d3', label: 'Offre 4 – Détail 3' },
     ],
   },
   {
@@ -207,6 +221,28 @@ const SECTIONS = [
     ],
   },
 ]
+
+// ── Historique localStorage ───────────────────────────────────────────────────
+const HIST_KEY = 'pose_admin_history'
+
+function loadAllHistory(): Record<string, string[]> {
+  if (typeof window === 'undefined') return {}
+  try { return JSON.parse(localStorage.getItem(HIST_KEY) || '{}') } catch { return {} }
+}
+
+function pushHistory(section: string, field: string, val: string) {
+  if (typeof window === 'undefined' || !val) return
+  const all = loadAllHistory()
+  const k   = `${section}__${field}`
+  const prev = all[k] || []
+  if (prev[0] === val) return        // pas de doublon consécutif
+  all[k] = [val, ...prev].slice(0, 5)
+  localStorage.setItem(HIST_KEY, JSON.stringify(all))
+}
+
+function getFieldHistory(section: string, field: string): string[] {
+  return (loadAllHistory()[`${section}__${field}`]) || []
+}
 
 // ── Composant AlignPicker ─────────────────────────────────────────────────────
 const ALIGNMENTS = [
@@ -283,12 +319,11 @@ function StylePicker({
             type="button"
             onClick={() => update(sectionKey, colorKey, '')}
             className="text-xs text-texte/30 hover:text-texte/60 ml-1"
-            title="Réinitialiser"
+            title="Réinitialiser la couleur"
           >✕</button>
         )}
       </div>
 
-      {/* Séparateur */}
       <div className="w-px h-4 bg-rose-pastel/40" />
 
       {/* Tailles */}
@@ -313,7 +348,7 @@ function StylePicker({
             type="button"
             onClick={() => update(sectionKey, sizeKey, '')}
             className="text-xs text-texte/30 hover:text-texte/60 ml-1"
-            title="Réinitialiser"
+            title="Réinitialiser la taille"
           >✕</button>
         )}
       </div>
@@ -323,20 +358,24 @@ function StylePicker({
 
 // ── Composant principal ───────────────────────────────────────────────────────
 export default function AdminContent({ adminKey }: { adminKey: string }) {
-  const [content,     setContent]     = useState<Content | null>(null)
-  const [saved,       setSaved]       = useState(false)
-  const [loading,     setLoading]     = useState(false)
-  const [uploading,   setUploading]   = useState(false)
-  const [openSection, setOpenSection] = useState<string>('hero')
-  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({})
+  const [content,      setContent]     = useState<Content | null>(null)
+  const [saved,        setSaved]       = useState(false)
+  const [loading,      setLoading]     = useState(false)
+  const [uploading,    setUploading]   = useState(false)
+  const [openSection,  setOpenSection] = useState<string>('hero')
+  // Compteur pour forcer le re-render après push dans localStorage
+  const [histTick,     setHistTick]    = useState(0)
+
+  const fileRefs    = useRef<Record<string, HTMLInputElement | null>>({})
+  // Valeur au moment du focus (pour historique)
+  const focusBefore = useRef<Record<string, string>>({})
 
   useEffect(() => {
     fetch(`${BACKEND}/api/admin/content`, { headers: { 'x-admin-key': adminKey } })
       .then(r => r.json())
       .then(data => {
-        const merged = { ...data }
-        const allDefaults = { ...ALL_DEFAULTS, ...ENTREPRISES_DEFAULTS }
-        for (const [key, defaults] of Object.entries(allDefaults)) {
+        const merged: Content = { ...data }
+        for (const [key, defaults] of Object.entries(ALL_DEFAULTS)) {
           if (!merged[key] || Object.keys(merged[key]).length === 0) {
             merged[key] = { ...defaults }
           } else {
@@ -352,6 +391,20 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
     setContent({ ...content, [section]: { ...content[section], [field]: value } })
   }
 
+  /** Appelé onFocus — mémorise la valeur avant édition */
+  const handleFocus = (section: string, field: string, currentVal: string) => {
+    focusBefore.current[`${section}__${field}`] = currentVal
+  }
+
+  /** Appelé onBlur — pousse dans l'historique si la valeur a changé */
+  const handleBlur = (section: string, field: string, currentVal: string) => {
+    const before = focusBefore.current[`${section}__${field}`]
+    if (before !== undefined && before !== currentVal) {
+      pushHistory(section, field, before)
+      setHistTick(t => t + 1)
+    }
+  }
+
   const save = async () => {
     setLoading(true)
     await fetch(`${BACKEND}/api/admin/content`, {
@@ -359,7 +412,7 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
       headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
       body: JSON.stringify(content),
     })
-    invalidateContent() // force les composants front à re-fetcher
+    invalidateContent()
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
     setLoading(false)
@@ -380,6 +433,10 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
   }
 
   if (!content) return <div className="text-center py-20 text-texte/40">Chargement…</div>
+
+  // Référence aux defaults pour les boutons reset
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  void histTick // utilisé pour forcer le re-render
 
   return (
     <div className="space-y-6">
@@ -463,28 +520,45 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
                 </div>
               )}
 
-              {/* Champs */}
+              {/* Champs texte */}
               {section.fields.map(field => {
-                if (field.key === 'photo') return null
-                const val = content[section.key]?.[field.key] || ''
+                const val        = content[section.key]?.[field.key] ?? ''
+                const defaultVal = ALL_DEFAULTS[section.key]?.[field.key] ?? ''
+                const history    = getFieldHistory(section.key, field.key)
+                const isModified = defaultVal && val !== defaultVal
+
                 return (
                   <div key={field.key} className="pt-4 first:pt-0">
-                    <label className="block text-sm font-medium text-texte mb-1">{field.label}</label>
-                    {field.multiline ? (
-                      <textarea
-                        rows={4}
-                        value={val}
-                        onChange={e => update(section.key, field.key, e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 focus:outline-none focus:border-rose-saumon text-texte text-sm resize-y"
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        value={val}
-                        onChange={e => update(section.key, field.key, e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 focus:outline-none focus:border-rose-saumon text-texte text-sm"
-                      />
-                    )}
+                    {/* Label + bouton reset */}
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-sm font-medium text-texte">{field.label}</label>
+                      {isModified && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            pushHistory(section.key, field.key, val)
+                            update(section.key, field.key, defaultVal)
+                            setHistTick(t => t + 1)
+                          }}
+                          className="text-xs text-texte/30 hover:text-rose-saumon transition-colors flex items-center gap-1"
+                          title={`Revenir à : "${defaultVal.slice(0, 40)}${defaultVal.length > 40 ? '…' : ''}"`}
+                        >
+                          ↺ Défaut
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Textarea (tous les champs) */}
+                    <textarea
+                      rows={val.includes('\n') ? Math.min(val.split('\n').length + 1, 8) : 2}
+                      value={val}
+                      onChange={e => update(section.key, field.key, e.target.value)}
+                      onFocus={() => handleFocus(section.key, field.key, val)}
+                      onBlur={e => handleBlur(section.key, field.key, e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 focus:outline-none focus:border-rose-saumon text-texte text-sm resize-y"
+                    />
+
+                    {/* StylePicker (couleur + taille) */}
                     {field.hasStyle && (
                       <StylePicker
                         sectionKey={section.key}
@@ -492,6 +566,24 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
                         content={content}
                         update={update}
                       />
+                    )}
+
+                    {/* Historique des modifications */}
+                    {history.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
+                        <span className="text-xs text-texte/30">Historique :</span>
+                        {history.map((hval, hi) => (
+                          <button
+                            key={hi}
+                            type="button"
+                            onClick={() => update(section.key, field.key, hval)}
+                            title={hval}
+                            className="text-xs text-texte/40 hover:text-rose-saumon underline underline-offset-2 transition-colors"
+                          >
+                            {hval.length > 30 ? hval.slice(0, 30) + '…' : hval}
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )

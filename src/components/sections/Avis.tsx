@@ -100,35 +100,37 @@ export default function Avis() {
           <div className="w-16 h-0.5 bg-rose-saumon mx-auto mt-6" />
         </div>
 
-        {/* Desktop : 3 cartes */}
-        <div className="hidden md:grid grid-cols-3 gap-6 mb-8">
-          {visible.map((idx, pos) => {
-            const a = reviews[idx]
-            return (
-              <a key={idx}
-                href={GOOGLE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => { if (pos !== 1) { e.preventDefault(); setCurrent(idx) } }}
-                className={`bg-blanc-casse rounded-2xl p-6 cursor-pointer transition-all duration-300 block ${
-                  pos === 1 ? 'shadow-lg scale-[1.03] border border-rose-pastel/40 hover:shadow-xl' : 'opacity-60 hover:opacity-80 shadow-sm'
-                }`}>
-                <Stars n={a.rating} />
-                <p className="text-texte/75 text-sm leading-relaxed mt-4 mb-5 italic line-clamp-5">"{a.text}"</p>
-                <div className="flex items-center gap-2">
-                  <Avatar photo={a.photo} name={a.author} />
-                  <div>
-                    <p className="font-semibold text-texte text-sm leading-none">{a.author}</p>
-                    <p className="text-texte/40 text-xs mt-0.5">{a.date}</p>
+        {/* Desktop : 3 cartes (seulement si 3 avis ou plus) */}
+        {count >= 3 && (
+          <div className="hidden md:grid grid-cols-3 gap-6 mb-8">
+            {visible.map((idx, pos) => {
+              const a = reviews[idx]
+              return (
+                <a key={pos}
+                  href={GOOGLE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => { if (pos !== 1) { e.preventDefault(); setCurrent(idx) } }}
+                  className={`bg-blanc-casse rounded-2xl p-6 cursor-pointer transition-all duration-300 block ${
+                    pos === 1 ? 'shadow-lg scale-[1.03] border border-rose-pastel/40 hover:shadow-xl' : 'opacity-60 hover:opacity-80 shadow-sm'
+                  }`}>
+                  <Stars n={a.rating} />
+                  <p className="text-texte/75 text-sm leading-relaxed mt-4 mb-5 italic line-clamp-5">"{a.text}"</p>
+                  <div className="flex items-center gap-2">
+                    <Avatar photo={a.photo} name={a.author} />
+                    <div>
+                      <p className="font-semibold text-texte text-sm leading-none">{a.author}</p>
+                      <p className="text-texte/40 text-xs mt-0.5">{a.date}</p>
+                    </div>
                   </div>
-                </div>
-              </a>
-            )
-          })}
-        </div>
+                </a>
+              )
+            })}
+          </div>
+        )}
 
-        {/* Mobile : 1 carte */}
-        <div className="md:hidden mb-8">
+        {/* Carte unique : toujours sur mobile, et sur desktop si < 3 avis */}
+        <div className={`${count >= 3 ? 'md:hidden' : ''} mb-8`}>
           <a href={GOOGLE_URL} target="_blank" rel="noopener noreferrer"
             className="bg-blanc-casse rounded-2xl p-6 shadow-md border border-rose-pastel/30 hover:shadow-lg transition-shadow block">
             <Stars n={reviews[current].rating} />

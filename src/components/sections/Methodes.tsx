@@ -54,10 +54,10 @@ export default function Methodes() {
       <div className="container-max">
         <div className="text-center mb-16">
           <p className="text-rose-saumon text-xs font-semibold tracking-widest uppercase mb-3">
-            Mes méthodes
+            {cs(content, 'methodes', 'label', 'Mes méthodes')}
           </p>
-          <h2 className="text-4xl md:text-5xl text-texte mb-6">
-            Deux approches complémentaires
+          <h2 className="text-4xl md:text-5xl text-texte mb-6" style={applyStyle(content, 'methodes', 'titre')}>
+            {cs(content, 'methodes', 'titre', 'Deux approches complémentaires')}
           </h2>
           <div className="w-16 h-0.5 bg-rose-saumon mx-auto" />
         </div>
