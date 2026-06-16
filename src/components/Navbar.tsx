@@ -5,21 +5,18 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useContent, cs } from '@/hooks/useContent'
 
-const navLinks = [
-  { label: 'Accueil',    href: '/#accueil' },
-  { label: 'Vision',     href: '/#vision' },
-  {
-    label: 'Méthodes',
-    href: '/#methodes',
-    children: [
-      { label: 'Coaching',    href: '/#coaching' },
-      { label: 'Sophrologie', href: '/#sophrologie' },
-    ],
-  },
-  { label: 'Qui ?',       href: '/#qui' },
-  { label: 'Entreprises', href: '/entreprises' },
-  { label: 'Contact',     href: '/#contact' },
-]
+// Labels par défaut — écrasés si présents dans le Sheet
+const ND = {
+  lien_accueil:     'Accueil',
+  lien_vision:      'Vision',
+  lien_methodes:    'Méthodes',
+  lien_coaching:    'Coaching',
+  lien_sophrologie: 'Sophrologie',
+  lien_qui:         'Qui ?',
+  lien_entreprises: 'Entreprises',
+  lien_contact:     'Contact',
+  cta_label:        'Prendre RDV',
+}
 
 function IconInstagram() {
   return (
@@ -46,6 +43,25 @@ export default function Navbar() {
   const instagram = cs(content, 'contact', 'instagram', 'https://www.instagram.com/laeti.sophrocoach/')
   const linkedin  = cs(content, 'contact', 'linkedin',  'https://www.linkedin.com/in/laetitia-chastel/')
 
+  // Labels du menu — lus depuis le Sheet avec fallback sur les defaults
+  const l = (key: keyof typeof ND) => cs(content, 'navbar', key, ND[key])
+
+  const navLinks = [
+    { label: l('lien_accueil'),     href: '/#accueil' },
+    { label: l('lien_vision'),      href: '/#vision' },
+    {
+      label: l('lien_methodes'),
+      href: '/#methodes',
+      children: [
+        { label: l('lien_coaching'),    href: '/#coaching' },
+        { label: l('lien_sophrologie'), href: '/#sophrologie' },
+      ],
+    },
+    { label: l('lien_qui'),         href: '/#qui' },
+    { label: l('lien_entreprises'), href: '/entreprises' },
+    { label: l('lien_contact'),     href: '/#contact' },
+  ]
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll)
@@ -61,21 +77,15 @@ export default function Navbar() {
       <nav className="container-max flex items-center justify-between h-20 px-6 md:px-12">
         {/* Logo */}
         <Link href="/#accueil" className="flex items-center">
-          <Image
-            src="/logos/LOGO ROSE SAUMON.png"
-            alt="P.ose – Sophrologie & Coaching"
-            width={120}
-            height={48}
-            className="object-contain"
-            priority
-          />
+          <Image src="/logos/LOGO ROSE SAUMON.png" alt="P.ose – Sophrologie & Coaching"
+            width={120} height={48} className="object-contain" priority />
         </Link>
 
         {/* Desktop nav */}
         <ul className="hidden md:flex items-center gap-6 text-sm font-medium text-texte">
           {navLinks.map((link) =>
             link.children ? (
-              <li key={link.label} className="relative group">
+              <li key={link.href} className="relative group">
                 <a href={link.href} className="flex items-center gap-1 hover:text-rose-saumon transition-colors py-2">
                   {link.label}
                   <svg className="w-3 h-3 mt-0.5 transition-transform group-hover:rotate-180" fill="currentColor" viewBox="0 0 20 20">
@@ -87,7 +97,7 @@ export default function Navbar() {
                                group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
                                transition-all duration-200">
                   {link.children.map((child) => (
-                    <li key={child.label}>
+                    <li key={child.href}>
                       <a href={child.href} className="block px-4 py-2.5 text-texte hover:bg-rose-pastel/20 hover:text-rose-saumon transition-colors">
                         {child.label}
                       </a>
@@ -96,10 +106,8 @@ export default function Navbar() {
                 </ul>
               </li>
             ) : (
-              <li key={link.label}>
-                <a href={link.href} className="hover:text-rose-saumon transition-colors">
-                  {link.label}
-                </a>
+              <li key={link.href}>
+                <a href={link.href} className="hover:text-rose-saumon transition-colors">{link.label}</a>
               </li>
             )
           )}
@@ -122,7 +130,7 @@ export default function Navbar() {
 
           {/* CTA */}
           <li>
-            <Link href="/rdv" className="btn-primary">Prendre RDV</Link>
+            <Link href="/rdv" className="btn-primary">{l('cta_label')}</Link>
           </li>
         </ul>
 
@@ -138,7 +146,7 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden bg-blanc-casse border-t border-rose-pastel/30 px-6 py-6 flex flex-col gap-1 text-sm font-medium text-texte">
           {navLinks.map((link) => (
-            <div key={link.label}>
+            <div key={link.href}>
               <div className="flex items-center justify-between">
                 <a href={link.href} className="block hover:text-rose-saumon transition-colors py-2 flex-1"
                   onClick={() => { if (!link.children) setMenuOpen(false) }}>
@@ -155,7 +163,7 @@ export default function Navbar() {
               {link.children && mobileMethodesOpen && (
                 <div className="pl-4 flex flex-col gap-0.5 mb-1">
                   {link.children.map((child) => (
-                    <a key={child.label} href={child.href}
+                    <a key={child.href} href={child.href}
                       className="block text-rose-saumon/80 hover:text-rose-saumon transition-colors py-1.5 text-sm"
                       onClick={() => setMenuOpen(false)}>
                       {child.label}
@@ -183,7 +191,7 @@ export default function Navbar() {
           </div>
 
           <Link href="/rdv" className="btn-primary text-center mt-3" onClick={() => setMenuOpen(false)}>
-            Prendre RDV
+            {l('cta_label')}
           </Link>
         </div>
       )}

@@ -69,18 +69,23 @@ export default function Methodes() {
               id={m.id}
               className={`rounded-3xl border ${m.border} ${m.bg} p-8 md:p-10 flex flex-col gap-6`}
             >
-              <div className="text-center" style={getAlign(content, m.section)}>
+              <div className="text-center">
                 <span className="text-4xl mb-4 block">{m.icone}</span>
-                <p className="text-rose-saumon text-xs font-semibold tracking-widest uppercase mb-1">Méthode</p>
-                <h3 className="text-3xl text-texte mb-1" style={applyStyle(content, m.section, 'titre')}>
+                <p className="text-rose-saumon text-xs font-semibold tracking-widest uppercase mb-1">
+                  {cs(content, m.section, 'label', 'Méthode')}
+                </p>
+                <h3 className="text-3xl text-texte mb-1"
+                    style={{ ...applyStyle(content, m.section, 'titre'), ...getAlign(content, m.section, 'titre') }}>
                   {m.titre}
                 </h3>
-                <p className="text-texte/50 italic" style={applyStyle(content, m.section, 'accroche')}>
+                <p className="text-texte/50 italic"
+                   style={{ ...applyStyle(content, m.section, 'accroche'), ...getAlign(content, m.section, 'accroche') }}>
                   {m.accroche}
                 </p>
               </div>
 
-              <div className="text-texte/75 leading-relaxed whitespace-pre-line text-[15px]">
+              <div className="text-texte/75 leading-relaxed whitespace-pre-line text-[15px]"
+                   style={getAlign(content, m.section, 'texte')}>
                 {m.texte}
               </div>
 

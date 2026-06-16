@@ -4,6 +4,7 @@ import { useContent, cs, applyStyle, getAlign } from '@/hooks/useContent'
 
 const S = 'vision'
 const D = {
+  label:      'Ma vision',
   titre:      'Un accompagnement ancré dans le vivant',
   texte1:     "Je crois profondément que chacun porte en lui les ressources nécessaires pour traverser les moments difficiles et se construire une vie qui lui ressemble.",
   texte2:     "Mon rôle n'est pas de vous donner des réponses, mais de créer un espace de confiance où vous pouvez les trouver vous-même — à votre rythme, avec douceur et exigence.",
@@ -13,6 +14,7 @@ const D = {
 export default function Vision() {
   const content = useContent()
 
+  const label      = cs(content, S, 'label',      D.label)
   const titre      = cs(content, S, 'titre',      D.titre)
   const texte1     = cs(content, S, 'texte1',     D.texte1)
   const texte2     = cs(content, S, 'texte2',     D.texte2)
@@ -22,20 +24,23 @@ export default function Vision() {
     <section id="vision" className="section-padding bg-vert-pastel/20">
       <div className="container-max">
         <div className="text-center mb-16">
+          {/* Badge dynamique */}
           <p className="text-rose-saumon text-xs font-semibold tracking-widest uppercase mb-3">
-            Ma vision
+            {label}
           </p>
-          <h2 className="text-4xl md:text-5xl text-texte mb-6" style={applyStyle(content, S, 'titre')}>
+          <h2 className="text-4xl md:text-5xl text-texte mb-6"
+              style={{ ...applyStyle(content, S, 'titre'), ...getAlign(content, S, 'titre') }}>
             {titre}
           </h2>
           <div className="w-16 h-0.5 bg-rose-saumon mx-auto" />
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6 text-texte/80 text-lg leading-relaxed" style={getAlign(content, S)}>
-            <p>{texte1}</p>
-            <p>{texte2}</p>
-            <p>
+          {/* Textes — chacun avec son alignement propre */}
+          <div className="space-y-6 text-texte/80 text-lg leading-relaxed">
+            <p style={getAlign(content, S, 'texte1')}>{texte1}</p>
+            <p style={getAlign(content, S, 'texte2')}>{texte2}</p>
+            <p style={getAlign(content, S, 'conviction')}>
               <strong className="text-texte">Ma conviction :</strong>{' '}
               {conviction}
             </p>

@@ -81,9 +81,14 @@ export function applyStyle(content: ContentMap, section: string, field: string):
   }
 }
 
-/** Retourne l'alignement texte d'une section */
-export function getAlign(content: ContentMap, section: string): CSSProperties {
-  const align = content[section]?.['_align']
+/**
+ * Retourne l'alignement texte.
+ * - Sans `field` : lit `_align` (niveau section, rétro-compat)
+ * - Avec `field`  : lit `_align_fieldKey` (niveau champ — prioritaire)
+ */
+export function getAlign(content: ContentMap, section: string, field?: string): CSSProperties {
+  const key   = field ? `_align_${field}` : '_align'
+  const align = content[section]?.[key]
   if (align === 'left')    return { textAlign: 'left' }
   if (align === 'right')   return { textAlign: 'right' }
   if (align === 'justify') return { textAlign: 'justify' }

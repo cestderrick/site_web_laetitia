@@ -31,38 +31,61 @@ const SIZES = [
   { label: 'XL', value: '1.875rem' },
 ]
 
+// ── Alignements ───────────────────────────────────────────────────────────────
+const ALIGNMENTS = [
+  { value: 'left',    label: '⬅', title: 'Gauche'   },
+  { value: 'center',  label: '↔', title: 'Centré'   },
+  { value: 'right',   label: '➡', title: 'Droite'   },
+  { value: 'justify', label: '≡', title: 'Justifié' },
+]
+
 // ── Valeurs par défaut ────────────────────────────────────────────────────────
 const ALL_DEFAULTS: Record<string, Record<string, string>> = {
+  navbar: {
+    lien_accueil:     'Accueil',
+    lien_vision:      'Vision',
+    lien_methodes:    'Méthodes',
+    lien_coaching:    'Coaching',
+    lien_sophrologie: 'Sophrologie',
+    lien_qui:         'Qui ?',
+    lien_entreprises: 'Entreprises',
+    lien_contact:     'Contact',
+    cta_label:        'Prendre RDV',
+  },
   hero: {
     accroche:  'Sophrologie & Coaching à Lyon, Giez (Proche Annecy) et visio',
     titre:     'Faire une pause pour mieux oser.',
     sousTitre: "Un espace doux et bienveillant pour vous reconnecter à vous-même, traverser les transitions de vie et révéler vos ressources profondes.",
   },
   quiSuisJe: {
+    label:  'Qui suis-je ?',
     titre:  'Laetitia Chastel',
     texte1: "Je m'appelle Laetitia, passionnée par l'humain et les parcours de vie. Je me forme au Coaching à la JBS Coaching et à la Sophrologie Caycédienne, dans la continuité d'un chemin déjà tourné vers l'accompagnement.",
     texte2: "Mon goût pour l'écoute et le développement des potentiels s'est d'abord exprimé dans les Ressources Humaines et l'orientation professionnelle. J'y ai découvert combien l'accompagnement peut aider à traverser les transitions et à redonner du sens.",
     texte3: "Chacune de mes expériences m'a rapprochée un peu plus de ce qui m'anime profondément : comprendre l'humain, créer du lien, révéler les ressources.",
   },
   vision: {
+    label:      'Ma vision',
     titre:      'Un accompagnement ancré dans le vivant',
     texte1:     "Je crois profondément que chacun porte en lui les ressources nécessaires pour traverser les moments difficiles et se construire une vie qui lui ressemble.",
     texte2:     "Mon rôle n'est pas de vous donner des réponses, mais de créer un espace de confiance où vous pouvez les trouver vous-même — à votre rythme, avec douceur et exigence.",
     conviction: "Les périodes d'incertitude sont des opportunités de se reconnecter à ce qui compte vraiment.",
   },
   coaching: {
+    label:    'Méthode',
     titre:    'Coaching',
     accroche: "De l'intention à l'action",
     texte:    "Le coaching est un espace de réflexion et d'action qui permet de mieux comprendre sa situation actuelle pour construire celle que l'on souhaite vivre.\n\nIl accompagne les périodes de transition, les prises de décision et les envies d'évolution, en aidant chacun à passer de l'intention à l'action.",
   },
   sophrologie: {
+    label:    'Méthode',
     titre:    'Sophrologie',
     accroche: 'Entraîner sa conscience',
     texte:    "La Sophrologie Caycédienne, créée par le psychiatre et professeur Alfonso Caycedo, est une méthode d'accompagnement qui combine la respiration, le mouvement et les évocations positives afin d'amener du mieux-être.\n\nIl s'agit d'un entraînement de la conscience qui permet de développer la conscience de soi et d'activer ses propres ressources au quotidien.",
   },
   methodes: {
-    titre: 'Deux approches complémentaires',
     label: 'Mes méthodes',
+    titre: 'Deux approches complémentaires',
   },
   entreprisesHero: {
     accroche:  'Sophrologie & Coaching en entreprise',
@@ -83,13 +106,13 @@ const ALL_DEFAULTS: Record<string, Record<string, string>> = {
     titre:        'Des formats adaptés à vos besoins',
     sousTitre:    "Chaque intervention est construite sur mesure après un échange préalable pour cerner vos enjeux et votre culture d'entreprise.",
     offre1_titre: 'Ateliers sophrologie',
-    offre1_desc:  "Séances collectives de sophrologie pour apprendre à gérer le stress, retrouver de l'énergie et améliorer la concentration. Format ponctuel ou programme sur plusieurs semaines.",
+    offre1_desc:  "Séances collectives de sophrologie pour apprendre à gérer le stress, retrouver de l'énergie et améliorer la concentration.",
     offre1_d1: '1h à 1h30 par session', offre1_d2: "Jusqu'à 12 participants", offre1_d3: 'Présentiel ou visio',
     offre2_titre: "Coaching d'équipe",
     offre2_desc:  "Accompagnement collectif pour renforcer la cohésion, clarifier les objectifs communs et améliorer la communication au sein de l'équipe.",
     offre2_d1: 'Demi-journée ou journée', offre2_d2: 'Sur mesure selon vos enjeux', offre2_d3: 'Présentiel ou visio',
     offre3_titre: 'Programme bien-être',
-    offre3_desc:  "Programme clé en main combinant sophrologie, coaching individuel et ateliers thématiques pour ancrer durablement le bien-être dans votre entreprise.",
+    offre3_desc:  "Programme clé en main combinant sophrologie, coaching individuel et ateliers thématiques pour ancrer durablement le bien-être.",
     offre3_d1: 'Sur 4 à 12 semaines', offre3_d2: 'Bilan initial & suivi', offre3_d3: 'Rapport final inclus',
     offre4_titre: 'Conférences & sensibilisation',
     offre4_desc:  "Interventions ponctuelles sur des thématiques comme la gestion du stress, la prévention du burn-out ou la qualité de vie au travail.",
@@ -104,78 +127,106 @@ const ALL_DEFAULTS: Record<string, Record<string, string>> = {
   },
 }
 
+// ── Type champ ────────────────────────────────────────────────────────────────
+type FieldDef = {
+  key:      string
+  label:    string
+  hasStyle?: boolean   // couleur + taille
+  hasAlign?: boolean   // alignement individuel
+}
+
 // ── Définition des sections ───────────────────────────────────────────────────
-const SECTIONS = [
+const SECTIONS: {
+  key:        string
+  label:      string
+  hasPhoto?:  boolean
+  photoLabel?: string
+  fields:     FieldDef[]
+}[] = [
+  {
+    key: 'navbar',
+    label: '🧭 Menu de navigation',
+    fields: [
+      { key: 'lien_accueil',     label: 'Lien Accueil' },
+      { key: 'lien_vision',      label: 'Lien Vision' },
+      { key: 'lien_methodes',    label: 'Lien Méthodes (parent)' },
+      { key: 'lien_coaching',    label: '↳ Sous-lien Coaching' },
+      { key: 'lien_sophrologie', label: '↳ Sous-lien Sophrologie' },
+      { key: 'lien_qui',         label: 'Lien Qui ?' },
+      { key: 'lien_entreprises', label: 'Lien Entreprises' },
+      { key: 'lien_contact',     label: 'Lien Contact' },
+      { key: 'cta_label',        label: 'Bouton CTA (Prendre RDV)' },
+    ],
+  },
   {
     key: 'hero',
     label: '🏠 Accueil (Hero)',
     hasPhoto: true,
-    hasAlign: true,
     photoLabel: 'Photo hero (optionnelle, entre le texte et les boutons)',
     fields: [
-      { key: 'accroche',  label: 'Accroche (petit texte coloré)', hasStyle: true },
-      { key: 'titre',     label: 'Titre principal',               hasStyle: true },
-      { key: 'sousTitre', label: 'Paragraphe intro',              hasStyle: true },
+      { key: 'accroche',  label: 'Accroche (petit texte coloré)', hasStyle: true, hasAlign: true },
+      { key: 'titre',     label: 'Titre principal',               hasStyle: true, hasAlign: true },
+      { key: 'sousTitre', label: 'Paragraphe intro',              hasStyle: true, hasAlign: true },
     ],
   },
   {
     key: 'quiSuisJe',
     label: '👤 Qui suis-je ?',
     hasPhoto: true,
-    hasAlign: true,
     fields: [
-      { key: 'titre',  label: 'Titre (nom affiché)',  hasStyle: true },
-      { key: 'texte1', label: 'Paragraphe 1' },
-      { key: 'texte2', label: 'Paragraphe 2' },
-      { key: 'texte3', label: 'Paragraphe 3' },
+      { key: 'label',  label: 'Badge (ex : "Qui suis-je ?")' },
+      { key: 'titre',  label: 'Titre (nom affiché)', hasStyle: true, hasAlign: true },
+      { key: 'texte1', label: 'Paragraphe 1',        hasAlign: true },
+      { key: 'texte2', label: 'Paragraphe 2',        hasAlign: true },
+      { key: 'texte3', label: 'Paragraphe 3',        hasAlign: true },
     ],
   },
   {
     key: 'vision',
     label: '🌿 Vision',
-    hasAlign: true,
     fields: [
-      { key: 'titre',      label: 'Titre',        hasStyle: true },
-      { key: 'texte1',     label: 'Paragraphe 1' },
-      { key: 'texte2',     label: 'Paragraphe 2' },
-      { key: 'conviction', label: 'Ma conviction' },
+      { key: 'label',      label: 'Badge (ex : "Ma vision")' },
+      { key: 'titre',      label: 'Titre',        hasStyle: true, hasAlign: true },
+      { key: 'texte1',     label: 'Paragraphe 1', hasAlign: true },
+      { key: 'texte2',     label: 'Paragraphe 2', hasAlign: true },
+      { key: 'conviction', label: 'Ma conviction', hasAlign: true },
     ],
   },
   {
     key: 'coaching',
     label: '🎯 Coaching',
-    hasAlign: true,
     fields: [
-      { key: 'titre',    label: 'Titre',      hasStyle: true },
-      { key: 'accroche', label: 'Sous-titre', hasStyle: true },
-      { key: 'texte',    label: 'Texte' },
+      { key: 'label',    label: 'Badge (ex : "Méthode")' },
+      { key: 'titre',    label: 'Titre',      hasStyle: true, hasAlign: true },
+      { key: 'accroche', label: 'Sous-titre', hasStyle: true, hasAlign: true },
+      { key: 'texte',    label: 'Texte',      hasAlign: true },
     ],
   },
   {
     key: 'sophrologie',
     label: '🌿 Sophrologie',
-    hasAlign: true,
     fields: [
-      { key: 'titre',    label: 'Titre',      hasStyle: true },
-      { key: 'accroche', label: 'Sous-titre', hasStyle: true },
-      { key: 'texte',    label: 'Texte' },
+      { key: 'label',    label: 'Badge (ex : "Méthode")' },
+      { key: 'titre',    label: 'Titre',      hasStyle: true, hasAlign: true },
+      { key: 'accroche', label: 'Sous-titre', hasStyle: true, hasAlign: true },
+      { key: 'texte',    label: 'Texte',      hasAlign: true },
     ],
   },
   {
     key: 'methodes',
     label: '🔄 Section Méthodes (titre)',
     fields: [
-      { key: 'label', label: 'Étiquette (ex : "Mes méthodes")' },
-      { key: 'titre', label: 'Titre de la section', hasStyle: true },
+      { key: 'label', label: 'Badge (ex : "Mes méthodes")' },
+      { key: 'titre', label: 'Titre de la section', hasStyle: true, hasAlign: true },
     ],
   },
   {
     key: 'entreprisesHero',
     label: '🏢 Entreprises – Hero',
     fields: [
-      { key: 'accroche',  label: 'Accroche',          hasStyle: true },
-      { key: 'titre1',    label: 'Titre – ligne 1',   hasStyle: true },
-      { key: 'titre2',    label: 'Titre – ligne 2',   hasStyle: true },
+      { key: 'accroche',  label: 'Accroche',         hasStyle: true },
+      { key: 'titre1',    label: 'Titre – ligne 1',  hasStyle: true },
+      { key: 'titre2',    label: 'Titre – ligne 2',  hasStyle: true },
       { key: 'sousTitre', label: 'Paragraphe intro' },
     ],
   },
@@ -193,7 +244,7 @@ const SECTIONS = [
     key: 'entreprisesOffres',
     label: '🎯 Entreprises – Offres',
     fields: [
-      { key: 'titre',        label: 'Titre de la section',   hasStyle: true },
+      { key: 'titre',        label: 'Titre de la section', hasStyle: true },
       { key: 'sousTitre',    label: 'Sous-titre' },
       { key: 'offre1_titre', label: 'Offre 1 – Titre',       hasStyle: true },
       { key: 'offre1_desc',  label: 'Offre 1 – Description' },
@@ -232,10 +283,10 @@ function loadAllHistory(): Record<string, string[]> {
 
 function pushHistory(section: string, field: string, val: string) {
   if (typeof window === 'undefined' || !val) return
-  const all = loadAllHistory()
-  const k   = `${section}__${field}`
+  const all  = loadAllHistory()
+  const k    = `${section}__${field}`
   const prev = all[k] || []
-  if (prev[0] === val) return        // pas de doublon consécutif
+  if (prev[0] === val) return
   all[k] = [val, ...prev].slice(0, 5)
   localStorage.setItem(HIST_KEY, JSON.stringify(all))
 }
@@ -244,130 +295,108 @@ function getFieldHistory(section: string, field: string): string[] {
   return (loadAllHistory()[`${section}__${field}`]) || []
 }
 
-// ── Composant AlignPicker ─────────────────────────────────────────────────────
-const ALIGNMENTS = [
-  { value: 'left',    label: '⬅', title: 'Gauche' },
-  { value: 'center',  label: '↔', title: 'Centré' },
-  { value: 'right',   label: '➡', title: 'Droite' },
-  { value: 'justify', label: '≡', title: 'Justifié' },
-]
-
-function AlignPicker({ sectionKey, content, update }: {
-  sectionKey: string
-  content: Content
-  update: (s: string, f: string, v: string) => void
-}) {
-  const cur = content[sectionKey]?.['_align'] || ''
-  return (
-    <div className="flex items-center gap-2 pt-3 pb-1">
-      <span className="text-xs text-texte/40">Alignement :</span>
-      {ALIGNMENTS.map(a => (
-        <button
-          key={a.value}
-          type="button"
-          title={a.title}
-          onClick={() => update(sectionKey, '_align', cur === a.value ? '' : a.value)}
-          className={`px-3 py-1 rounded-lg text-sm transition-all ${
-            cur === a.value
-              ? 'bg-rose-saumon text-white'
-              : 'bg-blanc-casse border border-rose-pastel/30 text-texte/50 hover:bg-rose-pastel/20'
-          }`}
-        >
-          {a.label} {a.title}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-// ── Composant StylePicker ─────────────────────────────────────────────────────
-function StylePicker({
-  sectionKey, fieldKey, content, update,
+// ── Composant FieldControls (couleur + taille + alignement) ──────────────────
+function FieldControls({
+  sectionKey, fieldKey, content, update, hasStyle, hasAlign,
 }: {
   sectionKey: string
   fieldKey:   string
   content:    Content
   update:     (s: string, f: string, v: string) => void
+  hasStyle?:  boolean
+  hasAlign?:  boolean
 }) {
+  if (!hasStyle && !hasAlign) return null
+
   const colorKey = `${fieldKey}_color`
   const sizeKey  = `${fieldKey}_size`
+  const alignKey = `_align_${fieldKey}`
   const curColor = content[sectionKey]?.[colorKey] || ''
   const curSize  = content[sectionKey]?.[sizeKey]  || ''
+  const curAlign = content[sectionKey]?.[alignKey] || ''
 
   return (
     <div className="flex flex-wrap items-center gap-3 mt-2 p-2.5 bg-blanc-casse/60 rounded-xl border border-rose-pastel/20">
-      {/* Couleurs */}
-      <div className="flex items-center gap-1.5">
-        <span className="text-xs text-texte/40 mr-0.5">Couleur</span>
-        {COLORS.map(c => (
-          <button
-            key={c.value}
-            title={c.label}
-            type="button"
-            onClick={() => update(sectionKey, colorKey, curColor === c.value ? '' : c.value)}
-            className="w-5 h-5 rounded-full transition-all flex-shrink-0"
-            style={{
-              backgroundColor: c.value,
-              outline: curColor === c.value ? '2px solid #3a3330' : '1px solid rgba(0,0,0,0.12)',
-              outlineOffset: curColor === c.value ? '2px' : '0px',
-              transform: curColor === c.value ? 'scale(1.15)' : 'scale(1)',
-            }}
-          />
-        ))}
-        {curColor && (
-          <button
-            type="button"
-            onClick={() => update(sectionKey, colorKey, '')}
-            className="text-xs text-texte/30 hover:text-texte/60 ml-1"
-            title="Réinitialiser la couleur"
-          >✕</button>
-        )}
-      </div>
+      {hasStyle && (
+        <>
+          {/* Couleurs */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-texte/40 mr-0.5">Couleur</span>
+            {COLORS.map(c => (
+              <button
+                key={c.value} title={c.label} type="button"
+                onClick={() => update(sectionKey, colorKey, curColor === c.value ? '' : c.value)}
+                className="w-5 h-5 rounded-full transition-all flex-shrink-0"
+                style={{
+                  backgroundColor: c.value,
+                  outline: curColor === c.value ? '2px solid #3a3330' : '1px solid rgba(0,0,0,0.12)',
+                  outlineOffset: curColor === c.value ? '2px' : '0px',
+                  transform: curColor === c.value ? 'scale(1.15)' : 'scale(1)',
+                }}
+              />
+            ))}
+            {curColor && (
+              <button type="button" onClick={() => update(sectionKey, colorKey, '')}
+                className="text-xs text-texte/30 hover:text-texte/60 ml-1" title="Réinitialiser">✕</button>
+            )}
+          </div>
 
-      <div className="w-px h-4 bg-rose-pastel/40" />
+          <div className="w-px h-4 bg-rose-pastel/40" />
 
-      {/* Tailles */}
-      <div className="flex items-center gap-1">
-        <span className="text-xs text-texte/40 mr-0.5">Taille</span>
-        {SIZES.map(s => (
-          <button
-            key={s.value}
-            type="button"
-            onClick={() => update(sectionKey, sizeKey, curSize === s.value ? '' : s.value)}
-            className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all ${
-              curSize === s.value
-                ? 'bg-rose-saumon text-white'
-                : 'bg-white text-texte/50 hover:bg-rose-pastel/20 border border-rose-pastel/30'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-        {curSize && (
-          <button
-            type="button"
-            onClick={() => update(sectionKey, sizeKey, '')}
-            className="text-xs text-texte/30 hover:text-texte/60 ml-1"
-            title="Réinitialiser la taille"
-          >✕</button>
-        )}
-      </div>
+          {/* Tailles */}
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-texte/40 mr-0.5">Taille</span>
+            {SIZES.map(s => (
+              <button key={s.value} type="button"
+                onClick={() => update(sectionKey, sizeKey, curSize === s.value ? '' : s.value)}
+                className={`px-2 py-0.5 rounded-md text-xs font-medium transition-all ${
+                  curSize === s.value ? 'bg-rose-saumon text-white' : 'bg-white text-texte/50 hover:bg-rose-pastel/20 border border-rose-pastel/30'
+                }`}>
+                {s.label}
+              </button>
+            ))}
+            {curSize && (
+              <button type="button" onClick={() => update(sectionKey, sizeKey, '')}
+                className="text-xs text-texte/30 hover:text-texte/60 ml-1" title="Réinitialiser">✕</button>
+            )}
+          </div>
+        </>
+      )}
+
+      {hasStyle && hasAlign && <div className="w-px h-4 bg-rose-pastel/40" />}
+
+      {hasAlign && (
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-texte/40 mr-0.5">Align</span>
+          {ALIGNMENTS.map(a => (
+            <button key={a.value} type="button" title={a.title}
+              onClick={() => update(sectionKey, alignKey, curAlign === a.value ? '' : a.value)}
+              className={`px-2 py-0.5 rounded-md text-xs transition-all ${
+                curAlign === a.value ? 'bg-rose-saumon text-white' : 'bg-white text-texte/40 hover:bg-rose-pastel/20 border border-rose-pastel/30'
+              }`}>
+              {a.label}
+            </button>
+          ))}
+          {curAlign && (
+            <button type="button" onClick={() => update(sectionKey, alignKey, '')}
+              className="text-xs text-texte/30 hover:text-texte/60 ml-1" title="Réinitialiser">✕</button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
 
 // ── Composant principal ───────────────────────────────────────────────────────
 export default function AdminContent({ adminKey }: { adminKey: string }) {
-  const [content,      setContent]     = useState<Content | null>(null)
-  const [saved,        setSaved]       = useState(false)
-  const [loading,      setLoading]     = useState(false)
-  const [uploading,    setUploading]   = useState(false)
-  const [openSection,  setOpenSection] = useState<string>('hero')
-  // Compteur pour forcer le re-render après push dans localStorage
-  const [histTick,     setHistTick]    = useState(0)
+  const [content,     setContent]     = useState<Content | null>(null)
+  const [saved,       setSaved]       = useState(false)
+  const [loading,     setLoading]     = useState(false)
+  const [uploading,   setUploading]   = useState(false)
+  const [openSection, setOpenSection] = useState<string>('hero')
+  const [histTick,    setHistTick]    = useState(0)
 
   const fileRefs    = useRef<Record<string, HTMLInputElement | null>>({})
-  // Valeur au moment du focus (pour historique)
   const focusBefore = useRef<Record<string, string>>({})
 
   useEffect(() => {
@@ -391,12 +420,10 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
     setContent({ ...content, [section]: { ...content[section], [field]: value } })
   }
 
-  /** Appelé onFocus — mémorise la valeur avant édition */
   const handleFocus = (section: string, field: string, currentVal: string) => {
     focusBefore.current[`${section}__${field}`] = currentVal
   }
 
-  /** Appelé onBlur — pousse dans l'historique si la valeur a changé */
   const handleBlur = (section: string, field: string, currentVal: string) => {
     const before = focusBefore.current[`${section}__${field}`]
     if (before !== undefined && before !== currentVal) {
@@ -434,9 +461,7 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
 
   if (!content) return <div className="text-center py-20 text-texte/40">Chargement…</div>
 
-  // Référence aux defaults pour les boutons reset
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  void histTick // utilisé pour forcer le re-render
+  void histTick
 
   return (
     <div className="space-y-6">
@@ -447,27 +472,19 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
 
       {SECTIONS.map(section => (
         <div key={section.key} className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          {/* Accordéon header */}
           <button
             onClick={() => setOpenSection(openSection === section.key ? '' : section.key)}
             className="w-full flex justify-between items-center px-6 py-4 text-left hover:bg-blanc-casse/50 transition-colors"
           >
             <span className="font-semibold text-texte">{section.label}</span>
-            <svg
-              className={`w-5 h-5 text-texte/40 transition-transform ${openSection === section.key ? 'rotate-180' : ''}`}
-              fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
-            >
+            <svg className={`w-5 h-5 text-texte/40 transition-transform ${openSection === section.key ? 'rotate-180' : ''}`}
+              fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
             </svg>
           </button>
 
           {openSection === section.key && (
             <div className="px-6 pb-6 space-y-4 border-t border-rose-pastel/20">
-
-              {/* Alignement */}
-              {section.hasAlign && (
-                <AlignPicker sectionKey={section.key} content={content} update={update} />
-              )}
 
               {/* Upload photo */}
               {section.hasPhoto && (
@@ -482,35 +499,20 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
                           src={content[section.key].photo.startsWith('/uploads')
                             ? `${BACKEND}${content[section.key].photo}`
                             : content[section.key].photo}
-                          alt="Photo actuelle"
-                          fill
-                          className="object-cover"
+                          alt="Photo actuelle" fill className="object-cover"
                         />
                       </div>
                     )}
                     <div className="flex flex-col gap-2">
-                      <button
-                        onClick={() => fileRefs.current[section.key]?.click()}
-                        disabled={uploading}
-                        className="btn-outline !py-2 !px-4 text-sm disabled:opacity-60"
-                      >
+                      <button onClick={() => fileRefs.current[section.key]?.click()} disabled={uploading}
+                        className="btn-outline !py-2 !px-4 text-sm disabled:opacity-60">
                         {uploading ? 'Upload en cours…' : '📁 Changer la photo'}
                       </button>
-                      <input
-                        ref={el => { fileRefs.current[section.key] = el }}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={e => {
-                          const file = e.target.files?.[0]
-                          if (file) uploadPhoto(file, section.key)
-                        }}
-                      />
+                      <input ref={el => { fileRefs.current[section.key] = el }} type="file" accept="image/*" className="hidden"
+                        onChange={e => { const file = e.target.files?.[0]; if (file) uploadPhoto(file, section.key) }} />
                       {content[section.key]?.photo && (
-                        <button
-                          onClick={() => update(section.key, 'photo', '')}
-                          className="text-xs text-texte/40 hover:text-rose-saumon transition-colors text-left"
-                        >
+                        <button onClick={() => update(section.key, 'photo', '')}
+                          className="text-xs text-texte/40 hover:text-rose-saumon transition-colors text-left">
                           ✕ Supprimer la photo
                         </button>
                       )}
@@ -520,35 +522,31 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
                 </div>
               )}
 
-              {/* Champs texte */}
+              {/* Champs */}
               {section.fields.map(field => {
                 const val        = content[section.key]?.[field.key] ?? ''
                 const defaultVal = ALL_DEFAULTS[section.key]?.[field.key] ?? ''
                 const history    = getFieldHistory(section.key, field.key)
-                const isModified = defaultVal && val !== defaultVal
+                const isModified = !!defaultVal && val !== defaultVal
 
                 return (
                   <div key={field.key} className="pt-4 first:pt-0">
-                    {/* Label + bouton reset */}
                     <div className="flex items-center justify-between mb-1">
                       <label className="text-sm font-medium text-texte">{field.label}</label>
                       {isModified && (
-                        <button
-                          type="button"
+                        <button type="button"
                           onClick={() => {
                             pushHistory(section.key, field.key, val)
                             update(section.key, field.key, defaultVal)
                             setHistTick(t => t + 1)
                           }}
-                          className="text-xs text-texte/30 hover:text-rose-saumon transition-colors flex items-center gap-1"
                           title={`Revenir à : "${defaultVal.slice(0, 40)}${defaultVal.length > 40 ? '…' : ''}"`}
-                        >
+                          className="text-xs text-texte/30 hover:text-rose-saumon transition-colors flex items-center gap-1">
                           ↺ Défaut
                         </button>
                       )}
                     </div>
 
-                    {/* Textarea (tous les champs) */}
                     <textarea
                       rows={val.includes('\n') ? Math.min(val.split('\n').length + 1, 8) : 2}
                       value={val}
@@ -558,28 +556,22 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
                       className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 focus:outline-none focus:border-rose-saumon text-texte text-sm resize-y"
                     />
 
-                    {/* StylePicker (couleur + taille) */}
-                    {field.hasStyle && (
-                      <StylePicker
-                        sectionKey={section.key}
-                        fieldKey={field.key}
-                        content={content}
-                        update={update}
-                      />
-                    )}
+                    <FieldControls
+                      sectionKey={section.key}
+                      fieldKey={field.key}
+                      content={content}
+                      update={update}
+                      hasStyle={field.hasStyle}
+                      hasAlign={field.hasAlign}
+                    />
 
-                    {/* Historique des modifications */}
                     {history.length > 0 && (
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
                         <span className="text-xs text-texte/30">Historique :</span>
                         {history.map((hval, hi) => (
-                          <button
-                            key={hi}
-                            type="button"
-                            onClick={() => update(section.key, field.key, hval)}
+                          <button key={hi} type="button" onClick={() => update(section.key, field.key, hval)}
                             title={hval}
-                            className="text-xs text-texte/40 hover:text-rose-saumon underline underline-offset-2 transition-colors"
-                          >
+                            className="text-xs text-texte/40 hover:text-rose-saumon underline underline-offset-2 transition-colors">
                             {hval.length > 30 ? hval.slice(0, 30) + '…' : hval}
                           </button>
                         ))}
@@ -593,7 +585,6 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
         </div>
       ))}
 
-      {/* Sauvegarder */}
       <div className="flex justify-end pb-10">
         <button onClick={save} disabled={loading} className="btn-primary disabled:opacity-60 min-w-[160px]">
           {saved ? '✅ Sauvegardé !' : loading ? 'Sauvegarde…' : 'Sauvegarder tout'}
