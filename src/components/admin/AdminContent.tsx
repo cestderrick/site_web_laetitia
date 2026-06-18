@@ -24,11 +24,14 @@ const COLORS = [
 
 // ── Tailles de texte (5) ─────────────────────────────────────────────────────
 const SIZES = [
-  { label: 'XS', value: '0.75rem'  },
-  { label: 'S',  value: '0.875rem' },
-  { label: 'M',  value: '1rem'     },
-  { label: 'L',  value: '1.375rem' },
-  { label: 'XL', value: '1.875rem' },
+  { label: 'XS',  value: '0.75rem'  },
+  { label: 'S',   value: '0.875rem' },
+  { label: 'M',   value: '1rem'     },
+  { label: 'L',   value: '1.375rem' },
+  { label: 'XL',  value: '1.875rem' },
+  { label: '2XL', value: '3rem'     },
+  { label: '3XL', value: '4.5rem'   },
+  { label: 'MAX', value: '6rem'     },   // ≈ taille par défaut du titre hero
 ]
 
 // ── Alignements ───────────────────────────────────────────────────────────────
@@ -42,15 +45,16 @@ const ALIGNMENTS = [
 // ── Valeurs par défaut ────────────────────────────────────────────────────────
 const ALL_DEFAULTS: Record<string, Record<string, string>> = {
   navbar: {
-    lien_accueil:     'Accueil',
-    lien_vision:      'Vision',
-    lien_methodes:    'Méthodes',
-    lien_coaching:    'Coaching',
-    lien_sophrologie: 'Sophrologie',
-    lien_qui:         'Qui ?',
-    lien_entreprises: 'Entreprises',
-    lien_contact:     'Contact',
-    cta_label:        'Prendre RDV',
+    lien_accueil:      'Accueil',
+    lien_qui_suis_je:  'Qui suis-je ?',
+    lien_vision:       'Vision',
+    lien_methodes:     'Méthodes',
+    lien_coaching:     'Coaching',
+    lien_sophrologie:  'Sophrologie',
+    lien_qui:          'Pour qui ?',
+    lien_entreprises:  'Entreprises',
+    lien_contact:      'Contact',
+    cta_label:         'Prendre RDV',
   },
   hero: {
     accroche:  'Sophrologie & Coaching à Lyon, Giez (Proche Annecy) et visio',
@@ -58,11 +62,19 @@ const ALL_DEFAULTS: Record<string, Record<string, string>> = {
     sousTitre: "Un espace doux et bienveillant pour vous reconnecter à vous-même, traverser les transitions de vie et révéler vos ressources profondes.",
   },
   quiSuisJe: {
-    label:  'Qui suis-je ?',
-    titre:  'Laetitia Chastel',
-    texte1: "Je m'appelle Laetitia, passionnée par l'humain et les parcours de vie. Je me forme au Coaching à la JBS Coaching et à la Sophrologie Caycédienne, dans la continuité d'un chemin déjà tourné vers l'accompagnement.",
-    texte2: "Mon goût pour l'écoute et le développement des potentiels s'est d'abord exprimé dans les Ressources Humaines et l'orientation professionnelle. J'y ai découvert combien l'accompagnement peut aider à traverser les transitions et à redonner du sens.",
-    texte3: "Chacune de mes expériences m'a rapprochée un peu plus de ce qui m'anime profondément : comprendre l'humain, créer du lien, révéler les ressources.",
+    label:        'Qui suis-je ?',
+    titre:        'Laetitia Chastel',
+    texte1:       "Je m'appelle Laetitia, passionnée par l'humain et les parcours de vie. Je me forme au Coaching à la JBS Coaching et à la Sophrologie Caycédienne, dans la continuité d'un chemin déjà tourné vers l'accompagnement.",
+    texte2:       "Mon goût pour l'écoute et le développement des potentiels s'est d'abord exprimé dans les Ressources Humaines et l'orientation professionnelle. J'y ai découvert combien l'accompagnement peut aider à traverser les transitions et à redonner du sens.",
+    texte3:       "Chacune de mes expériences m'a rapprochée un peu plus de ce qui m'anime profondément : comprendre l'humain, créer du lien, révéler les ressources.",
+    // Badge EMCC
+    emcc_visible: 'oui',
+    emcc_titre:   'Certifiée EMCC',
+    emcc_sous:    'JBS Coaching • Sophrologie Caycédienne',
+    // Adresse
+    adresse_label: '29 place Bellecour — 69002 Lyon',
+    visio_visible: 'oui',
+    visio_label:   'En visio (France entière)',
   },
   vision: {
     label:      'Ma vision',
@@ -118,6 +130,14 @@ const ALL_DEFAULTS: Record<string, Record<string, string>> = {
     offre4_desc:  "Interventions ponctuelles sur des thématiques comme la gestion du stress, la prévention du burn-out ou la qualité de vie au travail.",
     offre4_d1: '45 min à 1h30', offre4_d2: 'Idéal pour séminaires', offre4_d3: 'Support de présentation fourni',
   },
+  quiSection: {
+    label: 'Pour qui ?',
+    titre: "Cet accompagnement est fait pour vous si…",
+    intro: "Que vous soyez en plein questionnement, en période de changement ou simplement en quête de mieux-être — il n'y a pas de bonne ou mauvaise raison de se faire accompagner.",
+    cta_texte: "Vous vous reconnaissez dans l'un de ces profils ?",
+    cta_titre: "Faisons connaissance lors d'un premier échange.",
+    cta_bouton: 'Prendre rendez-vous',
+  },
   contact: {
     adresse:   '29 place Bellecour, 69002 Lyon',
     email:     'sophrocoachinglaetitia@gmail.com',
@@ -148,11 +168,12 @@ const SECTIONS: {
     label: '🧭 Menu de navigation',
     fields: [
       { key: 'lien_accueil',     label: 'Lien Accueil' },
+      { key: 'lien_qui_suis_je', label: 'Lien Qui suis-je ?' },
       { key: 'lien_vision',      label: 'Lien Vision' },
       { key: 'lien_methodes',    label: 'Lien Méthodes (parent)' },
       { key: 'lien_coaching',    label: '↳ Sous-lien Coaching' },
       { key: 'lien_sophrologie', label: '↳ Sous-lien Sophrologie' },
-      { key: 'lien_qui',         label: 'Lien Qui ?' },
+      { key: 'lien_qui',         label: 'Lien Pour qui ?' },
       { key: 'lien_entreprises', label: 'Lien Entreprises' },
       { key: 'lien_contact',     label: 'Lien Contact' },
       { key: 'cta_label',        label: 'Bouton CTA (Prendre RDV)' },
@@ -174,11 +195,17 @@ const SECTIONS: {
     label: '👤 Qui suis-je ?',
     hasPhoto: true,
     fields: [
-      { key: 'label',  label: 'Badge (ex : "Qui suis-je ?")' },
-      { key: 'titre',  label: 'Titre (nom affiché)', hasStyle: true, hasAlign: true },
-      { key: 'texte1', label: 'Paragraphe 1',        hasAlign: true },
-      { key: 'texte2', label: 'Paragraphe 2',        hasAlign: true },
-      { key: 'texte3', label: 'Paragraphe 3',        hasAlign: true },
+      { key: 'label',         label: 'Badge (ex : "Qui suis-je ?")' },
+      { key: 'titre',         label: 'Titre (nom affiché)',       hasStyle: true, hasAlign: true },
+      { key: 'texte1',        label: 'Paragraphe 1',              hasAlign: true },
+      { key: 'texte2',        label: 'Paragraphe 2',              hasAlign: true },
+      { key: 'texte3',        label: 'Paragraphe 3',              hasAlign: true },
+      { key: 'adresse_label', label: 'Lieu (ex : "29 place Bellecour — 69002 Lyon")' },
+      { key: 'visio_visible', label: 'Afficher la mention visio ? (oui/non)' },
+      { key: 'visio_label',   label: 'Texte visio (ex : "En visio (France entière)")' },
+      { key: 'emcc_visible',  label: 'Afficher le badge EMCC ? (oui/non)' },
+      { key: 'emcc_titre',    label: 'Badge EMCC – titre',        hasStyle: true },
+      { key: 'emcc_sous',     label: 'Badge EMCC – sous-titre' },
     ],
   },
   {
@@ -224,10 +251,10 @@ const SECTIONS: {
     key: 'entreprisesHero',
     label: '🏢 Entreprises – Hero',
     fields: [
-      { key: 'accroche',  label: 'Accroche',         hasStyle: true },
-      { key: 'titre1',    label: 'Titre – ligne 1',  hasStyle: true },
-      { key: 'titre2',    label: 'Titre – ligne 2',  hasStyle: true },
-      { key: 'sousTitre', label: 'Paragraphe intro' },
+      { key: 'accroche',  label: 'Accroche',         hasStyle: true, hasAlign: true },
+      { key: 'titre1',    label: 'Titre – ligne 1',  hasStyle: true, hasAlign: true },
+      { key: 'titre2',    label: 'Titre – ligne 2',  hasStyle: true, hasAlign: true },
+      { key: 'sousTitre', label: 'Paragraphe intro',               hasAlign: true },
     ],
   },
   {
@@ -258,6 +285,18 @@ const SECTIONS: {
       { key: 'offre4_titre', label: 'Offre 4 – Titre',       hasStyle: true },
       { key: 'offre4_desc',  label: 'Offre 4 – Description' },
       { key: 'offre4_d1', label: 'Offre 4 – Détail 1' }, { key: 'offre4_d2', label: 'Offre 4 – Détail 2' }, { key: 'offre4_d3', label: 'Offre 4 – Détail 3' },
+    ],
+  },
+  {
+    key: 'quiSection',
+    label: '🙋 Pour qui ?',
+    fields: [
+      { key: 'label',      label: 'Badge (ex : "Pour qui ?")' },
+      { key: 'titre',      label: 'Titre principal',  hasStyle: true, hasAlign: true },
+      { key: 'intro',      label: 'Texte intro',      hasAlign: true },
+      { key: 'cta_texte',  label: 'CTA – Accroche' },
+      { key: 'cta_titre',  label: 'CTA – Titre',      hasStyle: true },
+      { key: 'cta_bouton', label: 'CTA – Texte bouton' },
     ],
   },
   {

@@ -39,7 +39,7 @@ export default function Hero() {
         </h1>
 
         {/* Sous-titre — alignement indépendant */}
-        <p className="text-lg md:text-xl text-texte/70 max-w-2xl mb-8 leading-relaxed"
+        <p className="text-lg md:text-xl text-texte/70 max-w-2xl mx-auto mb-8 leading-relaxed"
            style={{ ...applyStyle(content, S, 'sousTitre'), ...getAlign(content, S, 'sousTitre') }}>
           {sousTitre}
         </p>

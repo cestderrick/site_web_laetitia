@@ -8,11 +8,12 @@ import { useContent, cs } from '@/hooks/useContent'
 // Labels par défaut — écrasés si présents dans le Sheet
 const ND = {
   lien_accueil:     'Accueil',
+  lien_qui_suis_je: 'Qui suis-je ?',
   lien_vision:      'Vision',
   lien_methodes:    'Méthodes',
   lien_coaching:    'Coaching',
   lien_sophrologie: 'Sophrologie',
-  lien_qui:         'Qui ?',
+  lien_qui:         'Pour qui ?',
   lien_entreprises: 'Entreprises',
   lien_contact:     'Contact',
   cta_label:        'Prendre RDV',
@@ -48,6 +49,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: l('lien_accueil'),     href: '/#accueil' },
+    { label: l('lien_qui_suis_je'), href: '/#qui-suis-je' },
     { label: l('lien_vision'),      href: '/#vision' },
     {
       label: l('lien_methodes'),
