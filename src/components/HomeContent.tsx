@@ -7,6 +7,7 @@ import Vision         from '@/components/sections/Vision'
 import Methodes       from '@/components/sections/Methodes'
 import QuiSection     from '@/components/sections/QuiSection'
 import Avis           from '@/components/sections/Avis'
+import Faq            from '@/components/sections/Faq'
 import ContactSection from '@/components/sections/ContactSection'
 
 export default function HomeContent() {
@@ -25,6 +26,7 @@ export default function HomeContent() {
       <Methodes />
       <QuiSection />
       <Avis />
+      <Faq />
       <ContactSection />
     </main>
   )

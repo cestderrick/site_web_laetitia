@@ -4,10 +4,20 @@ import Footer                 from '@/components/Footer'
 import Link                   from 'next/link'
 import GoogleCalendarBooking  from '@/components/GoogleCalendarBooking'
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://site-web-laetitia.onrender.com'
+
 export const metadata: Metadata = {
-  title: 'Prendre rendez-vous – Laetitia Chastel Sophrologue Lyon',
+  title: 'Prendre rendez-vous – Sophrologue & Coach Lyon Bellecour | P.ose',
   description:
-    'Réservez votre séance de sophrologie ou de coaching à Lyon avec Laetitia Chastel. Consultez les créneaux disponibles et choisissez celui qui vous convient.',
+    'Réservez votre séance de sophrologie ou de coaching à Lyon (Bellecour) ou en visio avec Laetitia Chastel, sophrologue certifiée et coach EMCC. Créneaux disponibles en ligne.',
+  keywords: [
+    'rendez-vous sophrologue Lyon',
+    'réserver séance sophrologie Lyon',
+    'séance coaching Lyon',
+    'sophrologie Lyon Bellecour',
+    'prendre rdv sophrologue Lyon',
+  ],
+  alternates: { canonical: `${SITE_URL}/rdv` },
 }
 
 export default function RdvPage() {
