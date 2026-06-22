@@ -7,11 +7,18 @@ const SOPHRO  = process.env.SOPHRO_EMAIL
 const NAME    = process.env.SOPHRO_NAME
 
 function formatDate(isoString) {
-  return new Date(isoString).toLocaleString('fr-FR', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-    timeZone: 'Europe/Paris',
-  })
+  // isoString est déjà en heure Paris (ex: "2024-06-15T18:00:00")
+  // On parse manuellement pour éviter toute conversion UTC → Paris côté serveur
+  const [datePart, timePart] = isoString.split('T')
+  const [year, month, day]   = datePart.split('-').map(Number)
+  const time = timePart ? timePart.substring(0, 5) : '00:00' // "18:00"
+
+  // Utiliser Date() avec composants locaux pour avoir le bon jour de semaine
+  const d = new Date(year, month - 1, day)
+  const WEEKDAYS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi']
+  const MONTHS   = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']
+
+  return `${WEEKDAYS[d.getDay()]} ${day} ${MONTHS[month - 1]} ${year} à ${time}`
 }
 
 async function sendConfirmationToClient({ clientName, clientEmail, type, location, start }) {

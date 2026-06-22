@@ -8,6 +8,7 @@ const {
   getContent, setContent,
   getReviews, addReview, deleteReview,
 } = require('../googleSheets')
+const { createAvailableSlotEvent, deleteCalendarEvent } = require('../googleCalendar')
 
 const router     = express.Router()
 const UPLOADS_DIR = path.join(__dirname, '../../public/uploads')
@@ -86,7 +87,18 @@ router.post('/slots/generate', requireAdmin, async (req, res) => {
       }
     }
 
+    // Écrire d'abord dans Google Sheets
     await addSlots(newSlots)
+
+    // Créer les événements GCal en parallèle (non-bloquant si erreur)
+    Promise.allSettled(newSlots.map(async slot => {
+      const event = await createAvailableSlotEvent(slot)
+      await updateSlotRow(slot.id, { calendarEventId: event.id })
+    })).then(results => {
+      const failed = results.filter(r => r.status === 'rejected').length
+      if (failed > 0) console.warn(`${failed}/${newSlots.length} événements GCal non créés`)
+    })
+
     res.json({ success: true, count: newSlots.length })
   } catch (err) {
     res.status(500).json({ error: err.message })
@@ -99,6 +111,16 @@ router.post('/slots', requireAdmin, async (req, res) => {
     const { date, startTime, endTime, durationMinutes, location, allowVisio } = req.body
     const slot = { id: uuidv4(), date, startTime, endTime, durationMinutes: Number(durationMinutes), location, allowVisio: Boolean(allowVisio) }
     await addSlots([slot])
+
+    // Créer l'événement GCal "Créneau disponible" et stocker son ID
+    try {
+      const event = await createAvailableSlotEvent(slot)
+      await updateSlotRow(slot.id, { calendarEventId: event.id })
+      slot.calendarEventId = event.id
+    } catch (calErr) {
+      console.error('GCal event creation failed (non-bloquant):', calErr.message)
+    }
+
     res.json({ success: true, slot })
   } catch (err) {
     res.status(500).json({ error: err.message })
@@ -118,6 +140,12 @@ router.put('/slots/:id', requireAdmin, async (req, res) => {
 // DELETE /api/admin/slots/:id  (admin)
 router.delete('/slots/:id', requireAdmin, async (req, res) => {
   try {
+    // Récupérer le calendarEventId avant suppression pour nettoyer GCal
+    const allSlots = await getAllSlots()
+    const slot = allSlots.find(s => s.id === req.params.id)
+    if (slot?.calendarEventId) {
+      deleteCalendarEvent(slot.calendarEventId).catch(() => {}) // non-bloquant
+    }
     await deleteSlotRow(req.params.id)
     res.json({ success: true })
   } catch (err) {

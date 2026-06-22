@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState } from 'react'
 import { useContent, cs, applyStyle, imgSrc, getAlign } from '@/hooks/useContent'
 
 const S = 'hero'
@@ -13,6 +14,7 @@ const D = {
 
 export default function Hero() {
   const content = useContent()
+  const [photoError, setPhotoError] = useState(false)
 
   const accroche  = cs(content, S, 'accroche',  D.accroche)
   const titre     = cs(content, S, 'titre',     D.titre)
@@ -45,11 +47,12 @@ export default function Hero() {
         </p>
 
         {/* Photo optionnelle entre le texte et les boutons */}
-        {photo && (
+        {photo && !photoError && (
           <div className="flex justify-center mb-10">
             <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-3xl overflow-hidden shadow-lg">
               <Image src={imgSrc(photo)} alt="Photo hero" fill className="object-cover"
-                sizes="(max-width: 768px) 256px, 320px" />
+                sizes="(max-width: 768px) 256px, 320px"
+                onError={() => setPhotoError(true)} />
             </div>
           </div>
         )}
