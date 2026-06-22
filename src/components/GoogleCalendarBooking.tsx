@@ -63,8 +63,9 @@ export default function GoogleCalendarBooking() {
   const fcOui       = cs(content, S, 'fc_oui',       DR.fc_oui)
   const fcNon       = cs(content, S, 'fc_non',       DR.fc_non)
   const fcMessage   = cs(content, S, 'fc_message',   DR.fc_message)
-  const submitLabel = cs(content, S, 'submit_label', DR.submit_label)
-  const submitNote  = cs(content, S, 'submit_note',  DR.submit_note)
+  const notesPlaceholder = cs(content, S, 'notes_placeholder', 'Quelques mots pour préparer notre échange…')
+  const submitLabel      = cs(content, S, 'submit_label', DR.submit_label)
+  const submitNote       = cs(content, S, 'submit_note',  DR.submit_note)
 
   const [step,       setStep]       = useState<Step>('slot')
   const [slots,      setSlots]      = useState<Slot[]>([])
@@ -278,8 +279,8 @@ export default function GoogleCalendarBooking() {
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-texte mb-1">Ce qui vous amène (facultatif)</label>
-            <textarea rows={3} placeholder="Quelques mots pour préparer notre échange…"
+            <label className="block text-sm font-medium text-texte mb-1">Ce qui vous amène *</label>
+            <textarea required rows={3} placeholder={notesPlaceholder}
               value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}
               className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 bg-white focus:outline-none focus:border-rose-saumon text-texte resize-none" />
           </div>

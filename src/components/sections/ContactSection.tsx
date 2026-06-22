@@ -26,12 +26,13 @@ export default function ContactSection() {
   const [error, setError]     = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const content   = useContent()
-  const adresse   = cs(content, S, 'adresse',   D.adresse)
-  const email     = cs(content, S, 'email',     D.email)
-  const telephone = cs(content, S, 'telephone', D.telephone)
-  const instagram = cs(content, S, 'instagram', D.instagram)
-  const linkedin  = cs(content, S, 'linkedin',  D.linkedin)
+  const content            = useContent()
+  const adresse            = cs(content, S, 'adresse',             D.adresse)
+  const email              = cs(content, S, 'email',               D.email)
+  const telephone          = cs(content, S, 'telephone',           D.telephone)
+  const instagram          = cs(content, S, 'instagram',           D.instagram)
+  const linkedin           = cs(content, S, 'linkedin',            D.linkedin)
+  const messagePlaceholder = cs(content, S, 'message_placeholder', 'Décrivez brièvement ce qui vous amène…')
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
 
@@ -114,7 +115,7 @@ export default function ContactSection() {
                   <label className="block text-sm font-medium text-texte mb-1" htmlFor="message">Message *</label>
                   <textarea id="message" name="message" required rows={5} value={form.message} onChange={handleChange}
                     className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 bg-white focus:outline-none focus:border-rose-saumon transition-colors text-texte resize-none"
-                    placeholder="Décrivez brièvement ce qui vous amène…" />
+                    placeholder={messagePlaceholder} />
                 </div>
 
                 {error && (

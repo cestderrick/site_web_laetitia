@@ -182,15 +182,17 @@ const ALL_DEFAULTS: Record<string, Record<string, string>> = {
     fc_non:      'Non, je connais déjà',
     fc_message:  'Laetitia vous appellera avant le RDV pour mieux comprendre votre besoin et préparer votre séance ensemble.',
     // Bouton
+    notes_placeholder: 'Quelques mots pour préparer notre échange…',
     submit_label: 'Confirmer mon rendez-vous →',
     submit_note:  'Un email de confirmation vous sera envoyé après réservation.',
   },
   contact: {
-    adresse:   '29 place Bellecour, 69002 Lyon',
-    email:     'sophrocoachinglaetitia@gmail.com',
-    telephone: '06 64 43 87 47',
-    instagram: 'https://www.instagram.com/laeti.sophrocoach/',
-    linkedin:  'https://www.linkedin.com/in/laetitia-chastel/',
+    adresse:             '29 place Bellecour, 69002 Lyon',
+    email:               'sophrocoachinglaetitia@gmail.com',
+    telephone:           '06 64 43 87 47',
+    instagram:           'https://www.instagram.com/laeti.sophrocoach/',
+    linkedin:            'https://www.linkedin.com/in/laetitia-chastel/',
+    message_placeholder: 'Décrivez brièvement ce qui vous amène…',
   },
 }
 
@@ -389,6 +391,7 @@ const SECTIONS: {
       { key: 'fc_oui',      label: '1ère prise de contact – Bouton Oui' },
       { key: 'fc_non',      label: '1ère prise de contact – Bouton Non' },
       { key: 'fc_message',  label: '1ère prise de contact – Message affiché si Oui' },
+      { key: 'notes_placeholder', label: 'Placeholder – "Ce qui vous amène" (formulaire RDV)' },
       { key: 'submit_label', label: 'Texte du bouton Confirmer' },
       { key: 'submit_note',  label: 'Note sous le bouton' },
     ],
@@ -400,8 +403,9 @@ const SECTIONS: {
       { key: 'adresse',   label: 'Adresse' },
       { key: 'email',     label: 'Email' },
       { key: 'telephone', label: 'Téléphone' },
-      { key: 'instagram', label: 'Lien Instagram' },
-      { key: 'linkedin',  label: 'Lien LinkedIn' },
+      { key: 'instagram',           label: 'Lien Instagram' },
+      { key: 'linkedin',            label: 'Lien LinkedIn' },
+      { key: 'message_placeholder', label: 'Placeholder du champ "Message"' },
     ],
   },
 ]

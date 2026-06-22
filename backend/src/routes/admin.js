@@ -8,7 +8,7 @@ const {
   getContent, setContent,
   getReviews, addReview, deleteReview,
 } = require('../googleSheets')
-const { createAvailableSlotEvent, deleteCalendarEvent } = require('../googleCalendar')
+const { createAvailableSlotEvent, updateCalendarEventToBooking, deleteCalendarEvent } = require('../googleCalendar')
 
 const router     = express.Router()
 const UPLOADS_DIR = path.join(__dirname, '../../public/uploads')
@@ -132,6 +132,42 @@ router.put('/slots/:id', requireAdmin, async (req, res) => {
   try {
     const updated = await updateSlotRow(req.params.id, req.body)
     res.json({ success: true, slot: updated })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// POST /api/admin/slots/:id/release  — remet un créneau réservé à "available"
+router.post('/slots/:id/release', requireAdmin, async (req, res) => {
+  try {
+    const allSlots = await getAllSlots()
+    const slot = allSlots.find(s => s.id === req.params.id)
+    if (!slot) return res.status(404).json({ error: 'Créneau introuvable.' })
+
+    // Remettre le statut à available + effacer les infos client
+    await updateSlotRow(req.params.id, {
+      status: 'available',
+      clientName: '', clientEmail: '', clientPhone: '',
+      notes: '', calendarEventId: slot.calendarEventId || '',
+    })
+
+    // Remettre l'event GCal à "Créneau disponible" (couleur grise)
+    if (slot.calendarEventId) {
+      const startISO = `${slot.date}T${slot.startTime}:00`
+      const endISO   = `${slot.date}T${slot.endTime}:00`
+      updateCalendarEventToBooking({
+        eventId:     slot.calendarEventId,
+        start:       startISO,
+        end:         endISO,
+        summary:     `🗓️ Créneau disponible – ${slot.location}`,
+        location:    slot.location === 'Lyon' ? '29 place Bellecour, 69002 Lyon' : 'Giez (Proche Annecy)',
+        clientName:  'Créneau libéré',
+        clientEmail: '', clientPhone: '', notes: '', meetLink: null,
+        colorId:     '8', // Graphite
+      }).catch(() => {}) // non-bloquant
+    }
+
+    res.json({ success: true })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }

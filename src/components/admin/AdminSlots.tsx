@@ -58,6 +58,15 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
     loadSlots()
   }
 
+  const releaseSlot = async (id: string) => {
+    if (!confirm('Remettre ce créneau comme disponible ? (les infos client seront effacées)')) return
+    const res  = await fetch(`${BACKEND}/api/admin/slots/${id}/release`, { method: 'POST', headers })
+    const data = await res.json()
+    if (data.success) flash('Créneau libéré — de nouveau disponible.')
+    else flash(`Erreur : ${data.error}`)
+    loadSlots()
+  }
+
   const generate = async () => {
     setLoading(true)
     const res  = await fetch(`${BACKEND}/api/admin/slots/generate`, {
@@ -156,13 +165,22 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
                           <span className="text-xs text-rose-saumon font-medium">✅ {slot.clientName}</span>
                         )}
                       </div>
-                      {!isBooked && (
-                        <button onClick={() => deleteSlot(slot.id)}
-                          className="text-texte/20 hover:text-red-400 transition-colors text-lg flex-shrink-0"
-                          title="Supprimer">
-                          ✕
-                        </button>
-                      )}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {isBooked && (
+                          <button onClick={() => releaseSlot(slot.id)}
+                            className="text-xs px-2.5 py-1 rounded-lg border border-vert-pastel/60 text-texte/50 hover:bg-vert-pastel/20 hover:text-texte transition-colors"
+                            title="Libérer ce créneau (annulation)">
+                            🔓 Libérer
+                          </button>
+                        )}
+                        {!isBooked && (
+                          <button onClick={() => deleteSlot(slot.id)}
+                            className="text-texte/20 hover:text-red-400 transition-colors text-lg"
+                            title="Supprimer">
+                            ✕
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )
                 })}
