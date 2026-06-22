@@ -36,9 +36,8 @@ export default function Hero() {
 
         {/* Titre — alignement indépendant */}
         <h1 className="text-5xl md:text-7xl lg:text-8xl text-texte leading-tight mb-6"
-            style={{ ...applyStyle(content, S, 'titre'), ...getAlign(content, S, 'titre') }}>
-          {titre}
-        </h1>
+            style={{ ...applyStyle(content, S, 'titre'), ...getAlign(content, S, 'titre') }}
+            dangerouslySetInnerHTML={renderRich(titre)} />
 
         {/* Sous-titre — alignement indépendant */}
         <p className="text-lg md:text-xl text-texte/70 max-w-2xl mx-auto mb-8 leading-relaxed"

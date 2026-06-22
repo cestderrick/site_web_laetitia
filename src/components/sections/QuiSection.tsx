@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useContent, cs, applyStyle, getAlign } from '@/hooks/useContent'
+import { useContent, cs, applyStyle, getAlign, renderRich } from '@/hooks/useContent'
 
 const S = 'quiSection'
 const D = {
@@ -54,13 +54,11 @@ export default function QuiSection() {
             {label}
           </p>
           <h2 className="text-4xl md:text-5xl text-texte mb-4"
-              style={{ ...applyStyle(content, S, 'titre'), ...getAlign(content, S, 'titre') }}>
-            {titre}
-          </h2>
+              style={{ ...applyStyle(content, S, 'titre'), ...getAlign(content, S, 'titre') }}
+              dangerouslySetInnerHTML={renderRich(titre)} />
           <p className="text-texte/60 text-lg max-w-2xl mx-auto leading-relaxed"
-             style={getAlign(content, S, 'intro')}>
-            {intro}
-          </p>
+             style={getAlign(content, S, 'intro')}
+             dangerouslySetInnerHTML={renderRich(intro)} />
           <div className="w-16 h-0.5 bg-rose-saumon mx-auto mt-6" />
         </div>
 
@@ -76,11 +74,10 @@ export default function QuiSection() {
         </div>
 
         <div className="text-center bg-rose-pastel/15 rounded-3xl p-10">
-          <p className="text-texte/70 text-lg mb-2">{ctaTexte}</p>
+          <p className="text-texte/70 text-lg mb-2" dangerouslySetInnerHTML={renderRich(ctaTexte)} />
           <h3 className="text-3xl text-texte mb-6"
-              style={applyStyle(content, S, 'cta_titre')}>
-            {ctaTitre}
-          </h3>
+              style={applyStyle(content, S, 'cta_titre')}
+              dangerouslySetInnerHTML={renderRich(ctaTitre)} />
           <Link href="/rdv" className="btn-primary">{ctaBouton}</Link>
         </div>
       </div>

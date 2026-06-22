@@ -43,12 +43,10 @@ export default function Faq() {
             {label}
           </p>
           <h2 className="text-4xl md:text-5xl text-texte mb-4"
-              style={{ ...applyStyle(content, S, 'titre'), ...getAlign(content, S, 'titre') }}>
-            {titre}
-          </h2>
-          <p className="text-texte/60 text-lg max-w-xl mx-auto">
-            {sousTitre}
-          </p>
+              style={{ ...applyStyle(content, S, 'titre'), ...getAlign(content, S, 'titre') }}
+              dangerouslySetInnerHTML={renderRich(titre)} />
+          <p className="text-texte/60 text-lg max-w-xl mx-auto"
+             dangerouslySetInnerHTML={renderRich(sousTitre)} />
           <div className="w-16 h-0.5 bg-rose-saumon mx-auto mt-6" />
         </div>
 

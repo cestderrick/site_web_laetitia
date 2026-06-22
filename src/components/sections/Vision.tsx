@@ -29,9 +29,8 @@ export default function Vision() {
             {label}
           </p>
           <h2 className="text-4xl md:text-5xl text-texte mb-6"
-              style={{ ...applyStyle(content, S, 'titre'), ...getAlign(content, S, 'titre') }}>
-            {titre}
-          </h2>
+              style={{ ...applyStyle(content, S, 'titre'), ...getAlign(content, S, 'titre') }}
+              dangerouslySetInnerHTML={renderRich(titre)} />
           <div className="w-16 h-0.5 bg-rose-saumon mx-auto" />
         </div>
 

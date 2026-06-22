@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useContent, cs, applyStyle, getAlign } from '@/hooks/useContent'
+import { useContent, cs, applyStyle, getAlign, renderRich } from '@/hooks/useContent'
 
 const DC = {
   titre:    'Coaching',
@@ -56,9 +56,8 @@ export default function Methodes() {
           <p className="text-rose-saumon text-xs font-semibold tracking-widest uppercase mb-3">
             {cs(content, 'methodes', 'label', 'Mes méthodes')}
           </p>
-          <h2 className="text-4xl md:text-5xl text-texte mb-6" style={applyStyle(content, 'methodes', 'titre')}>
-            {cs(content, 'methodes', 'titre', 'Deux approches complémentaires')}
-          </h2>
+          <h2 className="text-4xl md:text-5xl text-texte mb-6" style={applyStyle(content, 'methodes', 'titre')}
+              dangerouslySetInnerHTML={renderRich(cs(content, 'methodes', 'titre', 'Deux approches complémentaires'))} />
           <div className="w-16 h-0.5 bg-rose-saumon mx-auto" />
         </div>
 
@@ -75,18 +74,16 @@ export default function Methodes() {
                   {cs(content, m.section, 'label', 'Méthode')}
                 </p>
                 <h3 className="text-3xl text-texte mb-1"
-                    style={{ ...applyStyle(content, m.section, 'titre'), ...getAlign(content, m.section, 'titre') }}>
-                  {m.titre}
-                </h3>
+                    style={{ ...applyStyle(content, m.section, 'titre'), ...getAlign(content, m.section, 'titre') }}
+                    dangerouslySetInnerHTML={renderRich(m.titre)} />
                 <p className="text-texte/50 italic"
-                   style={{ ...applyStyle(content, m.section, 'accroche'), ...getAlign(content, m.section, 'accroche') }}>
-                  {m.accroche}
-                </p>
+                   style={{ ...applyStyle(content, m.section, 'accroche'), ...getAlign(content, m.section, 'accroche') }}
+                   dangerouslySetInnerHTML={renderRich(m.accroche)} />
               </div>
 
-              <div className="text-texte/75 leading-relaxed whitespace-pre-line text-[15px]"
-                   style={getAlign(content, m.section, 'texte')}>
-                {m.texte}
+              <div className="text-texte/75 leading-relaxed text-[15px]"
+                   style={getAlign(content, m.section, 'texte')}
+                   dangerouslySetInnerHTML={renderRich(m.texte)}>
               </div>
 
               <ul className="flex flex-col gap-2">
