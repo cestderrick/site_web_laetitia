@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useContent, cs, applyStyle, imgSrc, getAlign } from '@/hooks/useContent'
+import { useContent, cs, applyStyle, imgSrc, getAlign, renderRich } from '@/hooks/useContent'
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
 const S = 'quiSuisJe'
@@ -72,9 +72,9 @@ export default function QuiSuisJe() {
 
           {/* Textes */}
           <div className="space-y-6 text-texte/80 text-lg leading-relaxed">
-            <p style={getAlign(content, S, 'texte1')}>{texte1}</p>
-            <p style={getAlign(content, S, 'texte2')}>{texte2}</p>
-            <p style={getAlign(content, S, 'texte3')}>{texte3}</p>
+            <p dangerouslySetInnerHTML={renderRich(texte1)} style={getAlign(content, S, 'texte1')} />
+            <p dangerouslySetInnerHTML={renderRich(texte2)} style={getAlign(content, S, 'texte2')} />
+            <p dangerouslySetInnerHTML={renderRich(texte3)} style={getAlign(content, S, 'texte3')} />
 
             {/* Adresse + visio */}
             <div className="flex flex-col gap-2 pt-4 border-t border-rose-pastel/30">

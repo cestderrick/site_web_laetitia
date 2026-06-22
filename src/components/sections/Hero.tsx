@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
-import { useContent, cs, applyStyle, imgSrc, getAlign } from '@/hooks/useContent'
+import { useContent, cs, applyStyle, imgSrc, getAlign, renderRich } from '@/hooks/useContent'
 
 const S = 'hero'
 const D = {
@@ -42,9 +42,8 @@ export default function Hero() {
 
         {/* Sous-titre — alignement indépendant */}
         <p className="text-lg md:text-xl text-texte/70 max-w-2xl mx-auto mb-8 leading-relaxed"
-           style={{ ...applyStyle(content, S, 'sousTitre'), ...getAlign(content, S, 'sousTitre') }}>
-          {sousTitre}
-        </p>
+           style={{ ...applyStyle(content, S, 'sousTitre'), ...getAlign(content, S, 'sousTitre') }}
+           dangerouslySetInnerHTML={renderRich(sousTitre)} />
 
         {/* Photo optionnelle entre le texte et les boutons */}
         {photo && !photoError && (

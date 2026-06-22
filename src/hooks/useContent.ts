@@ -101,3 +101,21 @@ export function imgSrc(src: string): string {
   if (!src) return ''
   return src.startsWith('/uploads') ? `${BACKEND}${src}` : src
 }
+
+/**
+ * Convertit un texte en HTML sûr avec support des sauts de ligne.
+ * - Les retours à la ligne (Enter dans le textarea) → <br>
+ * - Les balises <br> ou <br/> littérales → <br>
+ * - Tout autre HTML est échappé (pas de XSS)
+ * Usage : <p dangerouslySetInnerHTML={renderRich(texte)} />
+ */
+export function renderRich(text: string): { __html: string } {
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+  const withBr = escaped
+    .replace(/&lt;br\s*\/?&gt;/gi, '<br>')  // restaure <br> échappés
+    .replace(/\n/g, '<br>')                  // convertit les \n
+  return { __html: withBr }
+}

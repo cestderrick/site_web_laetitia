@@ -138,6 +138,33 @@ const ALL_DEFAULTS: Record<string, Record<string, string>> = {
     cta_titre: "Faisons connaissance lors d'un premier échange.",
     cta_bouton: 'Prendre rendez-vous',
   },
+  faq: {
+    label:     'Questions fréquentes',
+    titre:     'Sophrologie & Coaching à Lyon',
+    sousTitre: 'Tout ce que vous voulez savoir avant votre première séance.',
+    q1: "Qu'est-ce que la sophrologie caycédienne ?",
+    a1: "La sophrologie caycédienne est une méthode créée par le psychiatre Alfonso Caycedo. Elle combine respiration consciente, mouvements doux et évocations positives pour développer la conscience de soi et activer vos ressources intérieures. Les séances se pratiquent debout, assis ou allongé — aucun prérequis n'est nécessaire.",
+    q2: 'En quoi le coaching diffère-t-il de la sophrologie ?',
+    a2: "La sophrologie travaille sur le corps, les sensations et le mieux-être. Le coaching est un espace de réflexion orienté vers l'action : clarifier un objectif, prendre une décision, traverser une transition. Les deux approches sont complémentaires et peuvent être combinées selon votre situation.",
+    q3: 'Combien de séances faut-il prévoir ?',
+    a3: "Cela dépend de votre objectif. En sophrologie, un cycle de 6 à 8 séances permet d'apprendre les techniques et de les intégrer au quotidien. En coaching, la durée varie selon le projet. Une première séance découverte permet de faire le point ensemble sans engagement.",
+    q4: 'Les séances sont-elles remboursées par la mutuelle ?',
+    a4: "La sophrologie n'est pas remboursée par la Sécurité Sociale, mais de nombreuses mutuelles participent aux frais. Renseignez-vous auprès de votre complémentaire santé. Une facture peut vous être remise sur demande.",
+    q5: 'Peut-on faire des séances en visio ?',
+    a5: "Oui, toutes les séances (sophrologie et coaching) sont proposées en visioconférence pour toute la France. La qualité de l'accompagnement est identique : vous avez juste besoin d'un endroit calme et d'une connexion internet.",
+    q6: 'Proposez-vous des interventions en entreprise à Lyon ?',
+    a6: "Oui, P.ose intervient en entreprise à Lyon et en région Auvergne-Rhône-Alpes : ateliers de sophrologie, coaching d'équipe, programmes bien-être sur plusieurs semaines, conférences. Chaque intervention est construite sur mesure après un échange préalable.",
+  },
+  devis: {
+    titre:     'Parlons de votre projet',
+    sousTitre: "Remplissez le formulaire et Laetitia vous recontacte sous 48h pour affiner votre besoin et vous proposer un devis personnalisé.",
+    cta:       'Envoyer ma demande de devis →',
+    note:      'Réponse sous 48h · Devis gratuit et sans engagement',
+    // Listes déroulantes — valeurs séparées par des virgules
+    effectifs: '1–10, 11–50, 51–200, 200+',
+    besoins:   "Atelier sophrologie, Coaching d'équipe, Programme bien-être, Conférence / Sensibilisation, Autre",
+    formats:   'Présentiel Lyon, Présentiel Giez, Visioconférence, Les deux',
+  },
   contact: {
     adresse:   '29 place Bellecour, 69002 Lyon',
     email:     'sophrocoachinglaetitia@gmail.com',
@@ -254,7 +281,7 @@ const SECTIONS: {
       { key: 'accroche',  label: 'Accroche',         hasStyle: true, hasAlign: true },
       { key: 'titre1',    label: 'Titre – ligne 1',  hasStyle: true, hasAlign: true },
       { key: 'titre2',    label: 'Titre – ligne 2',  hasStyle: true, hasAlign: true },
-      { key: 'sousTitre', label: 'Paragraphe intro',               hasAlign: true },
+      { key: 'sousTitre', label: 'Paragraphe intro', hasStyle: true, hasAlign: true },
     ],
   },
   {
@@ -285,6 +312,34 @@ const SECTIONS: {
       { key: 'offre4_titre', label: 'Offre 4 – Titre',       hasStyle: true },
       { key: 'offre4_desc',  label: 'Offre 4 – Description' },
       { key: 'offre4_d1', label: 'Offre 4 – Détail 1' }, { key: 'offre4_d2', label: 'Offre 4 – Détail 2' }, { key: 'offre4_d3', label: 'Offre 4 – Détail 3' },
+    ],
+  },
+  {
+    key: 'faq',
+    label: '❓ FAQ – Questions fréquentes',
+    fields: [
+      { key: 'label',     label: 'Badge (ex : "Questions fréquentes")' },
+      { key: 'titre',     label: 'Titre',     hasStyle: true, hasAlign: true },
+      { key: 'sousTitre', label: 'Sous-titre' },
+      { key: 'q1', label: 'Question 1' }, { key: 'a1', label: 'Réponse 1' },
+      { key: 'q2', label: 'Question 2' }, { key: 'a2', label: 'Réponse 2' },
+      { key: 'q3', label: 'Question 3' }, { key: 'a3', label: 'Réponse 3' },
+      { key: 'q4', label: 'Question 4' }, { key: 'a4', label: 'Réponse 4' },
+      { key: 'q5', label: 'Question 5' }, { key: 'a5', label: 'Réponse 5' },
+      { key: 'q6', label: 'Question 6' }, { key: 'a6', label: 'Réponse 6' },
+    ],
+  },
+  {
+    key: 'devis',
+    label: '📋 Formulaire devis entreprises',
+    fields: [
+      { key: 'titre',     label: 'Titre de la section', hasStyle: true },
+      { key: 'sousTitre', label: 'Sous-titre' },
+      { key: 'cta',       label: 'Texte du bouton Envoyer' },
+      { key: 'note',      label: 'Note sous le bouton' },
+      { key: 'effectifs', label: 'Options Effectif (séparées par des virgules)' },
+      { key: 'besoins',   label: "Options Type d'intervention (séparées par des virgules)" },
+      { key: 'formats',   label: 'Options Format souhaité (séparées par des virgules)' },
     ],
   },
   {
@@ -542,20 +597,34 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
                         />
                       </div>
                     )}
-                    <div className="flex flex-col gap-2">
-                      <button onClick={() => fileRefs.current[section.key]?.click()} disabled={uploading}
-                        className="btn-outline !py-2 !px-4 text-sm disabled:opacity-60">
-                        {uploading ? 'Upload en cours…' : '📁 Changer la photo'}
-                      </button>
-                      <input ref={el => { fileRefs.current[section.key] = el }} type="file" accept="image/*" className="hidden"
-                        onChange={e => { const file = e.target.files?.[0]; if (file) uploadPhoto(file, section.key) }} />
+                    <div className="flex flex-col gap-2 flex-1">
+                      {/* Option 1 : URL externe */}
+                      <div>
+                        <p className="text-xs text-texte/50 mb-1">🔗 URL externe (recommandé)</p>
+                        <input
+                          type="url"
+                          placeholder="https://exemple.com/photo.jpg"
+                          value={content[section.key]?.photo?.startsWith('/uploads') ? '' : (content[section.key]?.photo || '')}
+                          onChange={e => update(section.key, 'photo', e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-rose-pastel/40 focus:outline-none focus:border-rose-saumon text-texte text-sm"
+                        />
+                      </div>
+                      {/* Option 2 : Upload fichier */}
+                      <div>
+                        <p className="text-xs text-texte/50 mb-1">📁 Upload local (perdu au redéploiement)</p>
+                        <button onClick={() => fileRefs.current[section.key]?.click()} disabled={uploading}
+                          className="btn-outline !py-2 !px-4 text-sm disabled:opacity-60">
+                          {uploading ? 'Upload en cours…' : '📁 Choisir un fichier'}
+                        </button>
+                        <input ref={el => { fileRefs.current[section.key] = el }} type="file" accept="image/*" className="hidden"
+                          onChange={e => { const file = e.target.files?.[0]; if (file) uploadPhoto(file, section.key) }} />
+                      </div>
                       {content[section.key]?.photo && (
                         <button onClick={() => update(section.key, 'photo', '')}
                           className="text-xs text-texte/40 hover:text-rose-saumon transition-colors text-left">
                           ✕ Supprimer la photo
                         </button>
                       )}
-                      <p className="text-xs text-texte/40">JPG, PNG, WebP — max 5 Mo</p>
                     </div>
                   </div>
                 </div>

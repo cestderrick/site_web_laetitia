@@ -1,6 +1,6 @@
 'use client'
 
-import { useContent, cs, applyStyle, getAlign } from '@/hooks/useContent'
+import { useContent, cs, applyStyle, getAlign, renderRich } from '@/hooks/useContent'
 
 const S = 'vision'
 const D = {
@@ -38,11 +38,11 @@ export default function Vision() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Textes — chacun avec son alignement propre */}
           <div className="space-y-6 text-texte/80 text-lg leading-relaxed">
-            <p style={getAlign(content, S, 'texte1')}>{texte1}</p>
-            <p style={getAlign(content, S, 'texte2')}>{texte2}</p>
+            <p dangerouslySetInnerHTML={renderRich(texte1)} style={getAlign(content, S, 'texte1')} />
+            <p dangerouslySetInnerHTML={renderRich(texte2)} style={getAlign(content, S, 'texte2')} />
             <p style={getAlign(content, S, 'conviction')}>
               <strong className="text-texte">Ma conviction :</strong>{' '}
-              {conviction}
+              <span dangerouslySetInnerHTML={renderRich(conviction)} />
             </p>
           </div>
 

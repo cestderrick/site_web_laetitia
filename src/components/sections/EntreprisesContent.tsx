@@ -146,10 +146,12 @@ export default function EntreprisesContent() {
         <div className="container-max">
           <div className="text-center mb-12">
             <p className="text-rose-saumon text-xs font-semibold tracking-widest uppercase mb-3">Devis gratuit</p>
-            <h2 className="text-3xl md:text-4xl text-texte mb-3">Parlons de votre projet</h2>
+            <h2 className="text-3xl md:text-4xl text-texte mb-3"
+                style={applyStyle(content, 'devis', 'titre')}>
+              {cs(content, 'devis', 'titre', 'Parlons de votre projet')}
+            </h2>
             <p className="text-texte/60 max-w-lg mx-auto leading-relaxed">
-              Remplissez le formulaire ci-dessous et Laetitia vous recontacte
-              sous 48h pour affiner votre besoin et vous proposer un devis personnalisé.
+              {cs(content, 'devis', 'sousTitre', "Remplissez le formulaire ci-dessous et Laetitia vous recontacte sous 48h pour affiner votre besoin et vous proposer un devis personnalisé.")}
             </p>
             <div className="w-12 h-0.5 bg-rose-saumon mx-auto mt-6" />
           </div>
