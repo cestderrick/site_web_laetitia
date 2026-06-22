@@ -6,6 +6,24 @@ const FROM    = `P.ose Sophrologie <${process.env.FROM_EMAIL || 'onboarding@rese
 const SOPHRO  = process.env.SOPHRO_EMAIL
 const NAME    = process.env.SOPHRO_NAME
 
+// "2024-06-15T18:00:00" → "20240615T180000" (format Google Calendar)
+function toGCalDate(isoString) {
+  return isoString.replace(/[-:]/g, '').substring(0, 15)
+}
+
+function buildGCalLink({ start, end, title, location, description }) {
+  const base   = 'https://calendar.google.com/calendar/render'
+  const params = [
+    'action=TEMPLATE',
+    `text=${encodeURIComponent(title)}`,
+    `dates=${toGCalDate(start)}%2F${toGCalDate(end)}`,
+    `ctz=Europe%2FParis`,
+    `location=${encodeURIComponent(location || '')}`,
+    `details=${encodeURIComponent(description || '')}`,
+  ].join('&')
+  return `${base}?${params}`
+}
+
 function formatDate(isoString) {
   // isoString est déjà en heure Paris (ex: "2024-06-15T18:00:00")
   // On parse manuellement pour éviter toute conversion UTC → Paris côté serveur
@@ -21,7 +39,23 @@ function formatDate(isoString) {
   return `${WEEKDAYS[d.getDay()]} ${day} ${MONTHS[month - 1]} ${year} à ${time}`
 }
 
-async function sendConfirmationToClient({ clientName, clientEmail, type, location, start }) {
+async function sendConfirmationToClient({ clientName, clientEmail, type, location, start, end, meetLink }) {
+  const gCalLink = buildGCalLink({
+    start,
+    end,
+    title:       `RDV ${NAME} – ${type}`,
+    location,
+    description: `Rendez-vous avec ${NAME}, Sophrologue & Coach à Lyon.`,
+  })
+
+  const meetBlock = meetLink
+    ? `<div style="background:#e8f0fe;border-radius:12px;padding:20px;margin:16px 0;border-left:4px solid #4285f4">
+         <p style="margin:0"><strong>🎥 Lien Google Meet :</strong></p>
+         <a href="${meetLink}" style="color:#4285f4;font-size:15px;word-break:break-all">${meetLink}</a>
+         <p style="margin:8px 0 0;font-size:13px;color:#555">Cliquez sur ce lien le jour du rendez-vous pour rejoindre la séance.</p>
+       </div>`
+    : ''
+
   await resend.emails.send({
     from:    FROM,
     to:      clientEmail,
@@ -37,6 +71,13 @@ async function sendConfirmationToClient({ clientName, clientEmail, type, locatio
             <p style="margin:0"><strong>📅 Date :</strong> ${formatDate(start)}</p>
             <p style="margin:8px 0 0"><strong>📍 Lieu :</strong> ${location}</p>
           </div>
+          ${meetBlock}
+          <div style="text-align:center;margin:24px 0">
+            <a href="${gCalLink}" target="_blank"
+               style="display:inline-block;background:#f0806b;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold">
+              📆 Ajouter à mon Google Agenda
+            </a>
+          </div>
           <p>En cas d'empêchement, merci de prévenir <strong>au moins 48h à l'avance</strong> :</p>
           <p>📧 <a href="mailto:${SOPHRO}" style="color:#f0806b">${SOPHRO}</a></p>
           <p style="color:#888;font-size:14px;margin-top:32px">À très bientôt,<br><strong style="color:#3a3330">${NAME}</strong><br>Sophrologue &amp; Coach certifiée EMCC</p>
@@ -45,7 +86,7 @@ async function sendConfirmationToClient({ clientName, clientEmail, type, locatio
   })
 }
 
-async function sendNotificationToSophro({ clientName, clientEmail, clientPhone, type, location, start, notes }) {
+async function sendNotificationToSophro({ clientName, clientEmail, clientPhone, type, location, start, notes, meetLink }) {
   await resend.emails.send({
     from:    FROM,
     to:      SOPHRO,
@@ -62,6 +103,7 @@ async function sendNotificationToSophro({ clientName, clientEmail, clientPhone, 
             <p><strong>🎯</strong> ${type}</p>
             <p><strong>📅</strong> ${formatDate(start)}</p>
             <p><strong>📍</strong> ${location}</p>
+            ${meetLink ? `<p><strong>🎥 Meet :</strong> <a href="${meetLink}" style="color:#4285f4">${meetLink}</a></p>` : ''}
             ${notes ? `<p><strong>📝</strong> ${notes}</p>` : ''}
           </div>
         </div>

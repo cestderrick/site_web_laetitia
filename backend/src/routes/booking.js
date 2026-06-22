@@ -41,7 +41,8 @@ router.post('/', async (req, res) => {
     const colorId  = chosenMode === 'visio' ? COLOR_VISIO : COLOR_PRESENTIEL
 
     // 2. Mettre à jour l'événement GCal existant OU en créer un nouveau
-    let eventId = slot.calendarEventId
+    let eventId  = slot.calendarEventId
+    let meetLink = null
     if (eventId) {
       // Patch l'événement "Créneau disponible" avec les infos du RDV + couleur
       const event = await updateCalendarEventToBooking({
@@ -49,7 +50,8 @@ router.post('/', async (req, res) => {
         summary, location: locationLabel,
         clientName, clientEmail, clientPhone, notes, colorId,
       })
-      eventId = event.id
+      eventId  = event.id
+      meetLink = event.meetLink || null
     } else {
       // Fallback : créer un nouvel événement (créneau ajouté avant cette mise à jour)
       const event = await createCalendarEvent({
@@ -57,7 +59,8 @@ router.post('/', async (req, res) => {
         summary, location: locationLabel,
         clientName, clientEmail, clientPhone, notes, colorId,
       })
-      eventId = event.id
+      eventId  = event.id
+      meetLink = event.meetLink || null
     }
 
     // 3. Marquer le créneau comme réservé dans Google Sheets
@@ -71,8 +74,8 @@ router.post('/', async (req, res) => {
     // 4. Emails de confirmation (non-bloquant)
     const type = chosenMode === 'visio' ? 'Visio' : `Présentiel – ${slot.location}`
     Promise.all([
-      sendConfirmationToClient({ clientName, clientEmail, type, location: locationLabel, start: startISO, end: endISO }),
-      sendNotificationToSophro({ clientName, clientEmail, clientPhone, type, location: locationLabel, start: startISO, notes }),
+      sendConfirmationToClient({ clientName, clientEmail, type, location: locationLabel, start: startISO, end: endISO, meetLink }),
+      sendNotificationToSophro({ clientName, clientEmail, clientPhone, type, location: locationLabel, start: startISO, notes, meetLink }),
     ]).catch(err => console.error('Erreur envoi email RDV (non-bloquant):', err.message))
 
     res.json({ success: true, eventId, message: 'Rendez-vous confirmé !' })
