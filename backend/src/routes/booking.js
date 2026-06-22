@@ -13,7 +13,7 @@ const COLOR_VISIO      = '9'
 // POST /api/booking
 // Body: { slotId, chosenMode, clientName, clientEmail, clientPhone?, notes? }
 router.post('/', async (req, res) => {
-  const { slotId, chosenMode, clientName, clientEmail, clientPhone, notes } = req.body
+  const { slotId, chosenMode, clientName, clientEmail, clientPhone, notes, sessionType, isFirstContact } = req.body
 
   if (!slotId || !chosenMode || !clientName || !clientEmail) {
     return res.status(400).json({ error: 'Champs requis manquants.' })
@@ -74,8 +74,8 @@ router.post('/', async (req, res) => {
     // 4. Emails de confirmation (non-bloquant)
     const type = chosenMode === 'visio' ? 'Visio' : `Présentiel – ${slot.location}`
     Promise.all([
-      sendConfirmationToClient({ clientName, clientEmail, type, location: locationLabel, start: startISO, end: endISO, meetLink }),
-      sendNotificationToSophro({ clientName, clientEmail, clientPhone, type, location: locationLabel, start: startISO, notes, meetLink }),
+      sendConfirmationToClient({ clientName, clientEmail, type, location: locationLabel, start: startISO, end: endISO, meetLink, sessionType }),
+      sendNotificationToSophro({ clientName, clientEmail, clientPhone, type, location: locationLabel, start: startISO, notes, meetLink, sessionType, isFirstContact }),
     ]).catch(err => console.error('Erreur envoi email RDV (non-bloquant):', err.message))
 
     res.json({ success: true, eventId, message: 'Rendez-vous confirmé !' })

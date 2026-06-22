@@ -9,8 +9,11 @@ function getAuth() {
 }
 
 function getMeetLink(eventData) {
+  // Lien Meet depuis l'event GCal, ou fallback sur l'URL fixe en variable d'env
   return eventData.conferenceData?.entryPoints
-    ?.find(e => e.entryPointType === 'video')?.uri || null
+    ?.find(e => e.entryPointType === 'video')?.uri
+    || process.env.MEET_FALLBACK_URL
+    || null
 }
 
 function getCalendarClient() {

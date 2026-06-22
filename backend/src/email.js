@@ -39,7 +39,7 @@ function formatDate(isoString) {
   return `${WEEKDAYS[d.getDay()]} ${day} ${MONTHS[month - 1]} ${year} à ${time}`
 }
 
-async function sendConfirmationToClient({ clientName, clientEmail, type, location, start, end, meetLink }) {
+async function sendConfirmationToClient({ clientName, clientEmail, type, location, start, end, meetLink, sessionType }) {
   const gCalLink = buildGCalLink({
     start,
     end,
@@ -66,7 +66,7 @@ async function sendConfirmationToClient({ clientName, clientEmail, type, locatio
         <div style="background:#f5f2ef;padding:40px;border-radius:16px">
           <h1 style="color:#f0806b">Votre rendez-vous est confirmé !</h1>
           <p>Bonjour ${clientName},</p>
-          <p>Votre séance <strong>${type}</strong> a bien été enregistrée.</p>
+          <p>Votre séance <strong>${type}</strong>${sessionType ? ` · <strong>${sessionType}</strong>` : ''} a bien été enregistrée.</p>
           <div style="background:white;border-radius:12px;padding:20px;margin:24px 0;border-left:4px solid #f0806b">
             <p style="margin:0"><strong>📅 Date :</strong> ${formatDate(start)}</p>
             <p style="margin:8px 0 0"><strong>📍 Lieu :</strong> ${location}</p>
@@ -86,7 +86,7 @@ async function sendConfirmationToClient({ clientName, clientEmail, type, locatio
   })
 }
 
-async function sendNotificationToSophro({ clientName, clientEmail, clientPhone, type, location, start, notes, meetLink }) {
+async function sendNotificationToSophro({ clientName, clientEmail, clientPhone, type, location, start, notes, meetLink, sessionType, isFirstContact }) {
   await resend.emails.send({
     from:    FROM,
     to:      SOPHRO,
@@ -100,10 +100,12 @@ async function sendNotificationToSophro({ clientName, clientEmail, clientPhone, 
             <p><strong>👤</strong> ${clientName}</p>
             <p><strong>📧</strong> <a href="mailto:${clientEmail}" style="color:#f0806b">${clientEmail}</a></p>
             ${clientPhone ? `<p><strong>📞</strong> ${clientPhone}</p>` : ''}
-            <p><strong>🎯</strong> ${type}</p>
+            ${sessionType ? `<p><strong>📋 Séance :</strong> ${sessionType}</p>` : ''}
+            <p><strong>🎯 Mode :</strong> ${type}</p>
             <p><strong>📅</strong> ${formatDate(start)}</p>
             <p><strong>📍</strong> ${location}</p>
             ${meetLink ? `<p><strong>🎥 Meet :</strong> <a href="${meetLink}" style="color:#4285f4">${meetLink}</a></p>` : ''}
+            ${isFirstContact ? `<p><strong>🆕 Première prise de contact</strong> — appeler avant la séance</p>` : ''}
             ${notes ? `<p><strong>📝</strong> ${notes}</p>` : ''}
           </div>
         </div>

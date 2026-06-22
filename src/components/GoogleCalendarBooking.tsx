@@ -39,7 +39,7 @@ export default function GoogleCalendarBooking() {
   const [loading,    setLoading]    = useState(true)
   const [selected,   setSelected]   = useState<Slot | null>(null)
   const [chosenMode, setChosenMode] = useState<'presentiel' | 'visio' | null>(null)
-  const [form,       setForm]       = useState({ name: '', email: '', phone: '', notes: '' })
+  const [form,       setForm]       = useState({ name: '', email: '', phone: '', notes: '', sessionType: '', isFirstContact: '' })
   const [submitting, setSubmitting] = useState(false)
   const [errorMsg,   setErrorMsg]   = useState('')
 
@@ -58,6 +58,8 @@ export default function GoogleCalendarBooking() {
     else                           { setStep('mode') }
   }
 
+  const phoneRequired = form.isFirstContact === 'oui'
+
   const book = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selected || !chosenMode) return
@@ -70,6 +72,8 @@ export default function GoogleCalendarBooking() {
           slotId: selected.id, chosenMode,
           clientName: form.name, clientEmail: form.email,
           clientPhone: form.phone, notes: form.notes,
+          sessionType: form.sessionType,
+          isFirstContact: form.isFirstContact === 'oui',
         }),
       })
       const data = await res.json()
@@ -168,7 +172,50 @@ export default function GoogleCalendarBooking() {
           </div>
         </div>
 
-        <form onSubmit={book} className="flex flex-col gap-4">
+        <form onSubmit={book} className="flex flex-col gap-5">
+
+          {/* Type de séance */}
+          <div>
+            <label className="block text-sm font-medium text-texte mb-2">Type de séance *</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(['Sophrologie', 'Coaching', 'Les deux'] as const).map(t => (
+                <button key={t} type="button"
+                  onClick={() => setForm({...form, sessionType: t})}
+                  className={`py-2.5 px-3 rounded-xl text-sm border transition-all ${
+                    form.sessionType === t
+                      ? 'bg-rose-saumon text-white border-rose-saumon'
+                      : 'border-rose-pastel/40 text-texte/70 hover:border-rose-saumon bg-white'
+                  }`}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Première prise de contact */}
+          <div>
+            <label className="block text-sm font-medium text-texte mb-2">Est-ce votre première prise de contact ? *</label>
+            <div className="flex gap-3">
+              {(['oui', 'non'] as const).map(v => (
+                <button key={v} type="button"
+                  onClick={() => setForm({...form, isFirstContact: v})}
+                  className={`flex-1 py-2.5 rounded-xl text-sm border capitalize transition-all ${
+                    form.isFirstContact === v
+                      ? 'bg-rose-saumon text-white border-rose-saumon'
+                      : 'border-rose-pastel/40 text-texte/70 hover:border-rose-saumon bg-white'
+                  }`}>
+                  {v === 'oui' ? 'Oui, première fois' : 'Non, je connais déjà'}
+                </button>
+              ))}
+            </div>
+            {form.isFirstContact === 'oui' && (
+              <p className="mt-2 text-sm text-rose-saumon/80 bg-rose-saumon/8 rounded-lg px-3 py-2 leading-relaxed">
+                📞 Laetitia vous appellera avant le RDV pour mieux comprendre votre besoin et préparer votre séance ensemble.
+              </p>
+            )}
+          </div>
+
+          {/* Nom + Téléphone */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-texte mb-1">Nom & Prénom *</label>
@@ -177,25 +224,35 @@ export default function GoogleCalendarBooking() {
                 className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 bg-white focus:outline-none focus:border-rose-saumon text-texte" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-texte mb-1">Téléphone</label>
+              <label className="block text-sm font-medium text-texte mb-1">
+                Téléphone {phoneRequired ? '*' : '(facultatif)'}
+              </label>
               <input type="tel" placeholder="06 xx xx xx xx"
+                required={phoneRequired}
                 value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
                 className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 bg-white focus:outline-none focus:border-rose-saumon text-texte" />
             </div>
           </div>
+
+          {/* Email */}
           <div>
             <label className="block text-sm font-medium text-texte mb-1">Email *</label>
             <input required type="email" placeholder="marie@exemple.fr"
               value={form.email} onChange={e => setForm({...form, email: e.target.value})}
               className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 bg-white focus:outline-none focus:border-rose-saumon text-texte" />
           </div>
+
+          {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-texte mb-1">Ce qui vous amène (facultatif)</label>
             <textarea rows={3} placeholder="Quelques mots pour préparer notre échange…"
               value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}
               className="w-full px-4 py-3 rounded-xl border border-rose-pastel/40 bg-white focus:outline-none focus:border-rose-saumon text-texte resize-none" />
           </div>
-          <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
+
+          <button type="submit"
+            disabled={submitting || !form.sessionType || !form.isFirstContact}
+            className="btn-primary w-full disabled:opacity-60">
             {submitting ? 'Confirmation…' : 'Confirmer mon rendez-vous →'}
           </button>
           <p className="text-center text-xs text-texte/40">Un email de confirmation vous sera envoyé après réservation.</p>
