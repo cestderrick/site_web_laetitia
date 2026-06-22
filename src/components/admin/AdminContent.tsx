@@ -20,6 +20,9 @@ const COLORS = [
   { label: 'Gris doux',    value: '#b0a9a6' },
   { label: 'Blanc cassé',  value: '#f5f2ef' },
   { label: 'Blanc',        value: '#ffffff' },
+  { label: 'Violet',       value: '#8b6fba' },
+  { label: 'Orange',       value: '#f97316' },
+  { label: 'Bleu',         value: '#3b82f6' },
 ]
 
 // ── Tailles de texte (5) ─────────────────────────────────────────────────────
@@ -165,6 +168,23 @@ const ALL_DEFAULTS: Record<string, Record<string, string>> = {
     besoins:   "Atelier sophrologie, Coaching d'équipe, Programme bien-être, Conférence / Sensibilisation, Autre",
     formats:   'Présentiel Lyon, Présentiel Giez, Visioconférence, Les deux',
   },
+  rdvForm: {
+    // Type de séance
+    s1_label: 'Sophrologie',
+    s1_color: '#a8c5b0',
+    s2_label: 'Coaching',
+    s2_color: '#f0806b',
+    s3_label: 'Les deux',
+    s3_color: '#8b6fba',
+    // Première prise de contact
+    fc_question: 'Est-ce votre première prise de contact ?',
+    fc_oui:      'Oui, première fois',
+    fc_non:      'Non, je connais déjà',
+    fc_message:  'Laetitia vous appellera avant le RDV pour mieux comprendre votre besoin et préparer votre séance ensemble.',
+    // Bouton
+    submit_label: 'Confirmer mon rendez-vous →',
+    submit_note:  'Un email de confirmation vous sera envoyé après réservation.',
+  },
   contact: {
     adresse:   '29 place Bellecour, 69002 Lyon',
     email:     'sophrocoachinglaetitia@gmail.com',
@@ -176,10 +196,11 @@ const ALL_DEFAULTS: Record<string, Record<string, string>> = {
 
 // ── Type champ ────────────────────────────────────────────────────────────────
 type FieldDef = {
-  key:      string
-  label:    string
-  hasStyle?: boolean   // couleur + taille
-  hasAlign?: boolean   // alignement individuel
+  key:           string
+  label:         string
+  hasStyle?:     boolean   // couleur + taille
+  hasAlign?:     boolean   // alignement individuel
+  isColorOnly?:  boolean   // seulement un sélecteur de couleur (pour bg boutons)
 }
 
 // ── Définition des sections ───────────────────────────────────────────────────
@@ -355,6 +376,24 @@ const SECTIONS: {
     ],
   },
   {
+    key: 'rdvForm',
+    label: '📅 Formulaire prise de RDV',
+    fields: [
+      { key: 's1_label', label: 'Choix 1 – Libellé (ex: Sophrologie)' },
+      { key: 's1_color', label: 'Choix 1 – Couleur du bouton actif', isColorOnly: true },
+      { key: 's2_label', label: 'Choix 2 – Libellé (ex: Coaching)' },
+      { key: 's2_color', label: 'Choix 2 – Couleur du bouton actif', isColorOnly: true },
+      { key: 's3_label', label: 'Choix 3 – Libellé (ex: Les deux)' },
+      { key: 's3_color', label: 'Choix 3 – Couleur du bouton actif', isColorOnly: true },
+      { key: 'fc_question', label: '1ère prise de contact – Question' },
+      { key: 'fc_oui',      label: '1ère prise de contact – Bouton Oui' },
+      { key: 'fc_non',      label: '1ère prise de contact – Bouton Non' },
+      { key: 'fc_message',  label: '1ère prise de contact – Message affiché si Oui' },
+      { key: 'submit_label', label: 'Texte du bouton Confirmer' },
+      { key: 'submit_note',  label: 'Note sous le bouton' },
+    ],
+  },
+  {
     key: 'contact',
     label: '📞 Contact & Réseaux',
     fields: [
@@ -391,16 +430,45 @@ function getFieldHistory(section: string, field: string): string[] {
 
 // ── Composant FieldControls (couleur + taille + alignement) ──────────────────
 function FieldControls({
-  sectionKey, fieldKey, content, update, hasStyle, hasAlign,
+  sectionKey, fieldKey, content, update, hasStyle, hasAlign, isColorOnly,
 }: {
-  sectionKey: string
-  fieldKey:   string
-  content:    Content
-  update:     (s: string, f: string, v: string) => void
-  hasStyle?:  boolean
-  hasAlign?:  boolean
+  sectionKey:   string
+  fieldKey:     string
+  content:      Content
+  update:       (s: string, f: string, v: string) => void
+  hasStyle?:    boolean
+  hasAlign?:    boolean
+  isColorOnly?: boolean
 }) {
-  if (!hasStyle && !hasAlign) return null
+  if (!hasStyle && !hasAlign && !isColorOnly) return null
+
+  // isColorOnly : stocke la couleur directement dans fieldKey (pas fieldKey_color)
+  if (isColorOnly) {
+    const curColor = content[sectionKey]?.[fieldKey] || ''
+    return (
+      <div className="flex flex-wrap items-center gap-1.5 mt-2 p-2.5 bg-blanc-casse/60 rounded-xl border border-rose-pastel/20">
+        <span className="text-xs text-texte/40 mr-0.5">Couleur du bouton</span>
+        {COLORS.map(c => (
+          <button key={c.value} title={c.label} type="button"
+            onClick={() => update(sectionKey, fieldKey, curColor === c.value ? '' : c.value)}
+            className="w-5 h-5 rounded-full transition-all flex-shrink-0"
+            style={{
+              backgroundColor: c.value,
+              outline: curColor === c.value ? '2px solid #3a3330' : '1px solid rgba(0,0,0,0.12)',
+              outlineOffset: curColor === c.value ? '2px' : '0px',
+              transform: curColor === c.value ? 'scale(1.15)' : 'scale(1)',
+            }} />
+        ))}
+        {curColor && (
+          <>
+            <div className="w-6 h-6 rounded-full border border-texte/20 flex-shrink-0" style={{ backgroundColor: curColor }} />
+            <button type="button" onClick={() => update(sectionKey, fieldKey, '')}
+              className="text-xs text-texte/30 hover:text-texte/60" title="Réinitialiser">✕</button>
+          </>
+        )}
+      </div>
+    )
+  }
 
   const colorKey = `${fieldKey}_color`
   const sizeKey  = `${fieldKey}_size`
@@ -671,6 +739,7 @@ export default function AdminContent({ adminKey }: { adminKey: string }) {
                       update={update}
                       hasStyle={field.hasStyle}
                       hasAlign={field.hasAlign}
+                      isColorOnly={field.isColorOnly}
                     />
 
                     {history.length > 0 && (

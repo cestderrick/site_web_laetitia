@@ -1,6 +1,23 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useContent, cs } from '@/hooks/useContent'
+
+const S  = 'rdvForm'
+const DR = {
+  s1_label:     'Sophrologie',
+  s1_color:     '#a8c5b0',
+  s2_label:     'Coaching',
+  s2_color:     '#f0806b',
+  s3_label:     'Les deux',
+  s3_color:     '#8b6fba',
+  fc_question:  'Est-ce votre première prise de contact ?',
+  fc_oui:       'Oui, première fois',
+  fc_non:       'Non, je connais déjà',
+  fc_message:   'Laetitia vous appellera avant le RDV pour mieux comprendre votre besoin et préparer votre séance ensemble.',
+  submit_label: 'Confirmer mon rendez-vous →',
+  submit_note:  'Un email de confirmation vous sera envoyé après réservation.',
+}
 
 type Slot = {
   id: string; date: string; startTime: string; endTime: string
@@ -34,6 +51,21 @@ function locationLabel(location: string) {
 }
 
 export default function GoogleCalendarBooking() {
+  const content = useContent()
+
+  // Labels + couleurs depuis l'admin
+  const sessionTypes = [
+    { key: 's1', label: cs(content, S, 's1_label', DR.s1_label), color: cs(content, S, 's1_color', DR.s1_color) },
+    { key: 's2', label: cs(content, S, 's2_label', DR.s2_label), color: cs(content, S, 's2_color', DR.s2_color) },
+    { key: 's3', label: cs(content, S, 's3_label', DR.s3_label), color: cs(content, S, 's3_color', DR.s3_color) },
+  ]
+  const fcQuestion  = cs(content, S, 'fc_question',  DR.fc_question)
+  const fcOui       = cs(content, S, 'fc_oui',       DR.fc_oui)
+  const fcNon       = cs(content, S, 'fc_non',       DR.fc_non)
+  const fcMessage   = cs(content, S, 'fc_message',   DR.fc_message)
+  const submitLabel = cs(content, S, 'submit_label', DR.submit_label)
+  const submitNote  = cs(content, S, 'submit_note',  DR.submit_note)
+
   const [step,       setStep]       = useState<Step>('slot')
   const [slots,      setSlots]      = useState<Slot[]>([])
   const [loading,    setLoading]    = useState(true)
@@ -178,39 +210,41 @@ export default function GoogleCalendarBooking() {
           <div>
             <label className="block text-sm font-medium text-texte mb-2">Type de séance *</label>
             <div className="grid grid-cols-3 gap-2">
-              {(['Sophrologie', 'Coaching', 'Les deux'] as const).map(t => (
-                <button key={t} type="button"
-                  onClick={() => setForm({...form, sessionType: t})}
-                  className={`py-2.5 px-3 rounded-xl text-sm border transition-all ${
-                    form.sessionType === t
-                      ? 'bg-rose-saumon text-white border-rose-saumon'
-                      : 'border-rose-pastel/40 text-texte/70 hover:border-rose-saumon bg-white'
-                  }`}>
-                  {t}
-                </button>
-              ))}
+              {sessionTypes.map(({ key, label, color }) => {
+                const isActive = form.sessionType === label
+                return (
+                  <button key={key} type="button"
+                    onClick={() => setForm({...form, sessionType: label})}
+                    style={isActive ? { backgroundColor: color, borderColor: color, color: '#fff' } : {}}
+                    className={`py-2.5 px-3 rounded-xl text-sm border transition-all ${
+                      isActive ? '' : 'border-rose-pastel/40 text-texte/70 hover:border-rose-saumon bg-white'
+                    }`}>
+                    {label}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
           {/* Première prise de contact */}
           <div>
-            <label className="block text-sm font-medium text-texte mb-2">Est-ce votre première prise de contact ? *</label>
+            <label className="block text-sm font-medium text-texte mb-2">{fcQuestion} *</label>
             <div className="flex gap-3">
-              {(['oui', 'non'] as const).map(v => (
-                <button key={v} type="button"
-                  onClick={() => setForm({...form, isFirstContact: v})}
-                  className={`flex-1 py-2.5 rounded-xl text-sm border capitalize transition-all ${
-                    form.isFirstContact === v
+              {([{ val: 'oui', lbl: fcOui }, { val: 'non', lbl: fcNon }]).map(({ val, lbl }) => (
+                <button key={val} type="button"
+                  onClick={() => setForm({...form, isFirstContact: val})}
+                  className={`flex-1 py-2.5 rounded-xl text-sm border transition-all ${
+                    form.isFirstContact === val
                       ? 'bg-rose-saumon text-white border-rose-saumon'
                       : 'border-rose-pastel/40 text-texte/70 hover:border-rose-saumon bg-white'
                   }`}>
-                  {v === 'oui' ? 'Oui, première fois' : 'Non, je connais déjà'}
+                  {lbl}
                 </button>
               ))}
             </div>
             {form.isFirstContact === 'oui' && (
               <p className="mt-2 text-sm text-rose-saumon/80 bg-rose-saumon/8 rounded-lg px-3 py-2 leading-relaxed">
-                📞 Laetitia vous appellera avant le RDV pour mieux comprendre votre besoin et préparer votre séance ensemble.
+                📞 {fcMessage}
               </p>
             )}
           </div>
@@ -253,9 +287,9 @@ export default function GoogleCalendarBooking() {
           <button type="submit"
             disabled={submitting || !form.sessionType || !form.isFirstContact}
             className="btn-primary w-full disabled:opacity-60">
-            {submitting ? 'Confirmation…' : 'Confirmer mon rendez-vous →'}
+            {submitting ? 'Confirmation…' : submitLabel}
           </button>
-          <p className="text-center text-xs text-texte/40">Un email de confirmation vous sera envoyé après réservation.</p>
+          {submitNote && <p className="text-center text-xs text-texte/40">{submitNote}</p>}
         </form>
       </div>
     )

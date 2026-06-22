@@ -1,8 +1,14 @@
 const express = require('express')
+const crypto  = require('crypto')
 const { updateSlotRow } = require('../googleSheets')
 const { createCalendarEvent, updateCalendarEventToBooking } = require('../googleCalendar')
 const { sendConfirmationToClient, sendNotificationToSophro } = require('../email')
 const router = express.Router()
+
+function generateJitsiLink() {
+  const id = crypto.randomBytes(5).toString('hex') // ex: "a3f9c2b1e0"
+  return `https://meet.jit.si/PoseCoach-${id}`
+}
 
 // Couleurs Google Calendar
 // 3 = Grape (violet foncé) → présentiel
@@ -40,30 +46,28 @@ router.post('/', async (req, res) => {
     const summary  = `RDV ${chosenMode === 'visio' ? 'Visio' : slot.location} – ${clientName}`
     const colorId  = chosenMode === 'visio' ? COLOR_VISIO : COLOR_PRESENTIEL
 
-    // 2. Mettre à jour l'événement GCal existant OU en créer un nouveau
-    let eventId  = slot.calendarEventId
-    let meetLink = null
+    // 2. Générer un lien Jitsi unique pour les RDV visio
+    const meetLink = chosenMode === 'visio' ? generateJitsiLink() : null
+
+    // 3. Mettre à jour l'événement GCal existant OU en créer un nouveau
+    let eventId = slot.calendarEventId
     if (eventId) {
-      // Patch l'événement "Créneau disponible" avec les infos du RDV + couleur
       const event = await updateCalendarEventToBooking({
         eventId, start: startISO, end: endISO,
         summary, location: locationLabel,
-        clientName, clientEmail, clientPhone, notes, colorId,
+        clientName, clientEmail, clientPhone, notes, colorId, meetLink,
       })
-      eventId  = event.id
-      meetLink = event.meetLink || null
+      eventId = event.id
     } else {
-      // Fallback : créer un nouvel événement (créneau ajouté avant cette mise à jour)
       const event = await createCalendarEvent({
         start: startISO, end: endISO,
         summary, location: locationLabel,
-        clientName, clientEmail, clientPhone, notes, colorId,
+        clientName, clientEmail, clientPhone, notes, colorId, meetLink,
       })
-      eventId  = event.id
-      meetLink = event.meetLink || null
+      eventId = event.id
     }
 
-    // 3. Marquer le créneau comme réservé dans Google Sheets
+    // 4. Marquer le créneau comme réservé dans Google Sheets
     await updateSlotRow(slotId, {
       status: 'booked',
       clientName, clientEmail, clientPhone: clientPhone || '',
@@ -71,7 +75,7 @@ router.post('/', async (req, res) => {
       notes: notes || '',
     })
 
-    // 4. Emails de confirmation (non-bloquant)
+    // 5. Emails de confirmation (non-bloquant)
     const type = chosenMode === 'visio' ? 'Visio' : `Présentiel – ${slot.location}`
     Promise.all([
       sendConfirmationToClient({ clientName, clientEmail, type, location: locationLabel, start: startISO, end: endISO, meetLink, sessionType }),
