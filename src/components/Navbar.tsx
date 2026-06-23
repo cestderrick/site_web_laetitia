@@ -84,7 +84,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <ul className="hidden md:flex items-center gap-6 text-sm font-medium text-texte">
+        <ul className="hidden lg:flex items-center gap-6 text-sm font-medium text-texte">
           {navLinks.map((link) =>
             link.children ? (
               <li key={link.href} className="relative group">
@@ -137,7 +137,7 @@ export default function Navbar() {
         </ul>
 
         {/* Burger mobile */}
-        <button className="md:hidden flex flex-col gap-1.5 p-2" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
+        <button className="lg:hidden flex flex-col gap-1.5 p-2" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
           <span className={`block w-6 h-0.5 bg-texte transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
           <span className={`block w-6 h-0.5 bg-texte transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
           <span className={`block w-6 h-0.5 bg-texte transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
@@ -146,7 +146,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden bg-blanc-casse border-t border-rose-pastel/30 px-6 py-6 flex flex-col gap-1 text-sm font-medium text-texte">
+        <div className="lg:hidden bg-blanc-casse border-t border-rose-pastel/30 px-6 py-6 flex flex-col gap-1 text-sm font-medium text-texte">
           {navLinks.map((link) => (
             <div key={link.href}>
               <div className="flex items-center justify-between">
