@@ -1,7 +1,7 @@
 const express = require('express')
 const crypto  = require('crypto')
 const { updateSlotRow } = require('../googleSheets')
-const { createCalendarEvent, updateCalendarEventToBooking } = require('../googleCalendar')
+const { toParisISO, createCalendarEvent, updateCalendarEventToBooking } = require('../googleCalendar')
 const { sendConfirmationToClient, sendNotificationToSophro } = require('../email')
 const router = express.Router()
 
@@ -34,8 +34,8 @@ router.post('/', async (req, res) => {
     if (!slot)                       return res.status(404).json({ error: 'Créneau introuvable.' })
     if (slot.status !== 'available') return res.status(409).json({ error: "Ce créneau n'est plus disponible." })
 
-    const startISO = `${slot.date}T${slot.startTime}:00`
-    const endISO   = `${slot.date}T${slot.endTime}:00`
+    const startISO = toParisISO(slot.date, slot.startTime)
+    const endISO   = toParisISO(slot.date, slot.endTime)
 
     const locationLabel = chosenMode === 'visio'
       ? 'Visioconférence'

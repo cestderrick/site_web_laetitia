@@ -8,7 +8,7 @@ const {
   getContent, setContent,
   getReviews, addReview, deleteReview,
 } = require('../googleSheets')
-const { createAvailableSlotEvent, updateCalendarEventToBooking, deleteCalendarEvent } = require('../googleCalendar')
+const { toParisISO, checkFreeBusy, getAllBusyIntervals, createAvailableSlotEvent, updateCalendarEventToBooking, deleteCalendarEvent } = require('../googleCalendar')
 
 const router     = express.Router()
 const UPLOADS_DIR = path.join(__dirname, '../../public/uploads')
@@ -87,19 +87,42 @@ router.post('/slots/generate', requireAdmin, async (req, res) => {
       }
     }
 
+    // Vérifier les conflits sur le calendrier secondaire (si configuré)
+    let safeSlots   = newSlots
+    let skippedCount = 0
+    try {
+      if (process.env.GOOGLE_SECONDARY_CALENDAR_ID && newSlots.length > 0) {
+        const busyIntervals = await getAllBusyIntervals(startDate, endDate)
+        if (busyIntervals.length > 0) {
+          safeSlots = newSlots.filter(slot => {
+            const slotStart = new Date(toParisISO(slot.date, slot.startTime))
+            const slotEnd   = new Date(toParisISO(slot.date, slot.endTime))
+            return !busyIntervals.some(b => {
+              const bStart = new Date(b.start)
+              const bEnd   = new Date(b.end)
+              return slotStart < bEnd && slotEnd > bStart
+            })
+          })
+          skippedCount = newSlots.length - safeSlots.length
+        }
+      }
+    } catch (conflictErr) {
+      console.warn('Vérification conflits agenda secondaire échouée (non-bloquant):', conflictErr.message)
+    }
+
     // Écrire d'abord dans Google Sheets
-    await addSlots(newSlots)
+    if (safeSlots.length > 0) await addSlots(safeSlots)
 
     // Créer les événements GCal en parallèle (non-bloquant si erreur)
-    Promise.allSettled(newSlots.map(async slot => {
+    Promise.allSettled(safeSlots.map(async slot => {
       const event = await createAvailableSlotEvent(slot)
       await updateSlotRow(slot.id, { calendarEventId: event.id })
     })).then(results => {
       const failed = results.filter(r => r.status === 'rejected').length
-      if (failed > 0) console.warn(`${failed}/${newSlots.length} événements GCal non créés`)
+      if (failed > 0) console.warn(`${failed}/${safeSlots.length} événements GCal non créés`)
     })
 
-    res.json({ success: true, count: newSlots.length })
+    res.json({ success: true, count: safeSlots.length, skipped: skippedCount })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }
@@ -109,6 +132,20 @@ router.post('/slots/generate', requireAdmin, async (req, res) => {
 router.post('/slots', requireAdmin, async (req, res) => {
   try {
     const { date, startTime, endTime, durationMinutes, location, allowVisio } = req.body
+
+    // Vérifier les conflits sur le calendrier secondaire
+    try {
+      const hasConflict = await checkFreeBusy(date, startTime, endTime)
+      if (hasConflict) {
+        return res.status(409).json({
+          error: `Conflit détecté sur votre agenda personnel pour ce créneau (${startTime}–${endTime}).`,
+          conflict: true,
+        })
+      }
+    } catch (conflictErr) {
+      console.warn('Vérification conflits échouée (non-bloquant):', conflictErr.message)
+    }
+
     const slot = { id: uuidv4(), date, startTime, endTime, durationMinutes: Number(durationMinutes), location, allowVisio: Boolean(allowVisio) }
     await addSlots([slot])
 
@@ -153,8 +190,8 @@ router.post('/slots/:id/release', requireAdmin, async (req, res) => {
 
     // Remettre l'event GCal à "Créneau disponible" (couleur grise)
     if (slot.calendarEventId) {
-      const startISO = `${slot.date}T${slot.startTime}:00`
-      const endISO   = `${slot.date}T${slot.endTime}:00`
+      const startISO = toParisISO(slot.date, slot.startTime)
+      const endISO   = toParisISO(slot.date, slot.endTime)
       updateCalendarEventToBooking({
         eventId:     slot.calendarEventId,
         start:       startISO,

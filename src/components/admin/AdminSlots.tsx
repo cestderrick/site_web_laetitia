@@ -75,8 +75,12 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
       body: JSON.stringify(gen),
     })
     const data = await res.json()
-    if (data.success) { flash(`${data.count} créneaux générés !`); setTab('list'); loadSlots() }
-    else flash(`Erreur : ${data.error}`)
+    if (data.success) {
+      const skipInfo = data.skipped > 0 ? ` · ⚠️ ${data.skipped} ignoré${data.skipped > 1 ? 's' : ''} (conflit agenda)` : ''
+      flash(`${data.count} créneaux générés !${skipInfo}`)
+      setTab('list')
+      loadSlots()
+    } else flash(`Erreur : ${data.error}`)
     setLoading(false)
   }
 
@@ -91,8 +95,15 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
       body: JSON.stringify({ ...single, endTime }),
     })
     const data = await res.json()
-    if (data.success) { flash('Créneau ajouté !'); setTab('list'); loadSlots() }
-    else flash(`Erreur : ${data.error}`)
+    if (res.status === 409 && data.conflict) {
+      flash(`⚠️ Conflit agenda — ce créneau chevauche un événement existant`)
+    } else if (data.success) {
+      flash('Créneau ajouté !')
+      setTab('list')
+      loadSlots()
+    } else {
+      flash(`Erreur : ${data.error}`)
+    }
     setLoading(false)
   }
 
@@ -147,7 +158,7 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
                   const dayLabel = d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'short' })
                   const isBooked = slot.status === 'booked'
                   return (
-                    <div key={slot.id} className={`flex items-center gap-4 bg-white rounded-xl px-4 py-3 border ${isBooked?'border-rose-pastel/40 opacity-70':'border-transparent'}`}>
+                    <div key={slot.id} className={`flex items-center gap-4 bg-white rounded-xl px-4 py-3 border ${isBooked?'border-rose-pastel/40 opacity-70':'border-vert-pastel bg-vert-pastel/10'}`}>
                       <div className="flex-1 flex flex-wrap gap-x-4 gap-y-1 items-center">
                         <span className="font-medium text-texte capitalize text-sm">{dayLabel}</span>
                         <span className="text-texte/70 text-sm">{slot.startTime} – {slot.endTime}</span>

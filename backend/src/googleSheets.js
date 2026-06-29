@@ -41,11 +41,14 @@ async function getAllSlots() {
 
 async function getAvailableSlots() {
   const slots = await getAllSlots()
-  const now   = new Date()
+  // Heure actuelle en heure Paris (format 'sv' = 'YYYY-MM-DD HH:MM:SS', idéal pour comparaison chaîne)
+  const nowParis = new Date().toLocaleString('sv', { timeZone: 'Europe/Paris' })
+                              .replace(' ', 'T').slice(0, 16) // 'YYYY-MM-DDTHH:MM'
   return slots.filter(s => {
     if (s.status !== 'available') return false
-    const slotDate = new Date(`${s.date}T${s.startTime}:00`)
-    return slotDate > now
+    const [h, m] = (s.startTime || '00:00').split(':')
+    const slotStr = `${s.date}T${h.padStart(2,'0')}:${(m||'00').padStart(2,'0')}`
+    return slotStr > nowParis
   })
 }
 
