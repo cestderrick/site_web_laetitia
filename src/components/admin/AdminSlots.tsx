@@ -169,7 +169,7 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
             )}
             {Object.entries(groupedMap).map(([week, weekSlots]) => {
               const weekKey  = `${tab}__${week}`
-              const isOpen   = !collapsed[weekKey]
+              const isOpen   = collapsed[weekKey] === true
               const toggleWk = () => setCollapsed(c => ({ ...c, [weekKey]: !c[weekKey] }))
               return (
               <div key={week}>
