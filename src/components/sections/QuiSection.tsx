@@ -22,16 +22,16 @@ const profils = [
   {
     emoji: '⚡',
     titre: 'Vous êtes débordé·e ou épuisé·e',
-    desc:  "Stress chronique, surcharge mentale, difficulté à déconnecter. Vous avez besoin d'outils concrets pour retrouver calme et équilibre.",
+    desc:  "Stress chronique, surcharge mentale, difficulté à déconnecter. Vous avez besoin d'un espace et d'outils concrets pour retrouver du calme.",
   },
   {
     emoji: '🌱',
     titre: 'Vous souhaitez vous développer',
-    desc:  "Confiance en soi, affirmation, gestion des émotions. Vous voulez mieux vous connaître et libérer vos ressources intérieures.",
+    desc:  "Confiance en soi, affirmation de soi, gestion des émotions. Vous voulez mieux vous connaître et prendre conscience de vos ressources.",
   },
   {
     emoji: '🎯',
-    titre: 'Vous avez un objectif à atteindre',
+    titre: "Vous avez envie d'atteindre un objectif",
     desc:  "Examen, compétition, prise de parole, projet de vie. Vous souhaitez préparer mentalement une étape importante.",
   },
 ]
