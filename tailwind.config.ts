@@ -16,8 +16,9 @@ const config: Config = {
         'texte':        '#3a3330',
       },
       fontFamily: {
+        sans:    ['"Champagne & Limousines"', 'Georgia', 'serif'],
         heading: ['"Champagne & Limousines"', 'Georgia', 'serif'],
-        body:    ['Inter', 'sans-serif'],
+        body:    ['"Champagne & Limousines"', 'Georgia', 'serif'],
       },
       animation: {
         'fade-up': 'fadeUp 0.6s ease-out forwards',

@@ -68,7 +68,7 @@ async function createAvailableSlotEvent(slot) {
       summary:     `🗓️ Créneau disponible – ${slot.location}`,
       location:    locationLabel,
       description: `Créneau ouvert à la réservation sur le site.\n${modeInfo}`,
-      colorId:     '8', // Graphite (gris)
+      colorId:     '2', // Sage (vert)
       start: { dateTime: startISO, timeZone: 'Europe/Paris' },
       end:   { dateTime: endISO,   timeZone: 'Europe/Paris' },
       reminders: { useDefault: false, overrides: [] }, // aucun rappel

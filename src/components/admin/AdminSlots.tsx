@@ -121,7 +121,8 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
   }, {})
 
   const futureSlots  = slots.filter(s => s.date >= todayStr)
-  const pastSlots    = slots.filter(s => s.date <  todayStr)
+  // Historique : inverser l'ordre (plus récents en premier)
+  const pastSlots    = slots.filter(s => s.date <  todayStr).slice().reverse()
   const grouped      = groupByWeek(futureSlots)
   const groupedPast  = groupByWeek(pastSlots)
 
@@ -311,7 +312,7 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
           <div className="grid sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-texte/60 mb-1">Date</label>
-              <input type="date" value={single.date} onChange={e=>setSingle({...single,date:e.target.value})}
+              <input type="date" value={single.date} min={todayStr} onChange={e=>setSingle({...single,date:e.target.value})}
                 className="w-full px-4 py-2 rounded-xl border border-rose-pastel/40 focus:outline-none focus:border-rose-saumon" />
             </div>
             <div>

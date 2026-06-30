@@ -133,8 +133,8 @@ router.post('/slots', requireAdmin, async (req, res) => {
   try {
     const { date, startTime, endTime, durationMinutes, location, allowVisio } = req.body
 
-    // Vérifier les conflits sur le calendrier secondaire
-    try {
+    // Vérifier les conflits sur le calendrier secondaire (bloquant si configuré)
+    if (process.env.GOOGLE_SECONDARY_CALENDAR_ID) {
       const hasConflict = await checkFreeBusy(date, startTime, endTime)
       if (hasConflict) {
         return res.status(409).json({
@@ -142,8 +142,6 @@ router.post('/slots', requireAdmin, async (req, res) => {
           conflict: true,
         })
       }
-    } catch (conflictErr) {
-      console.warn('Vérification conflits échouée (non-bloquant):', conflictErr.message)
     }
 
     const slot = { id: uuidv4(), date, startTime, endTime, durationMinutes: Number(durationMinutes), location, allowVisio: Boolean(allowVisio) }

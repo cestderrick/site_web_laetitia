@@ -79,7 +79,13 @@ export default function GoogleCalendarBooking() {
   useEffect(() => {
     fetch(`${BACKEND}/api/slots`)
       .then(r => r.json())
-      .then(d => { setSlots(d.slots || []); setLoading(false) })
+      .then(d => {
+        const sorted = (d.slots || []).sort((a: Slot, b: Slot) =>
+          `${a.date}${a.startTime}`.localeCompare(`${b.date}${b.startTime}`)
+        )
+        setSlots(sorted)
+        setLoading(false)
+      })
       .catch(() => { setErrorMsg('Impossible de charger les créneaux.'); setStep('error'); setLoading(false) })
   }, [])
 
