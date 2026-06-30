@@ -175,7 +175,18 @@ async function getAllBusyIntervals(startDate, endDate) {
     },
   })
 
-  return res.data.calendars?.[calId]?.busy ?? []
+  const calData = res.data.calendars?.[calId]
+
+  // Si l'API retourne des erreurs (droits insuffisants, ID incorrect…), on throw
+  if (calData?.errors?.length) {
+    const reason = calData.errors[0].reason || 'unknown'
+    console.error(`[freebusy] Erreur agenda secondaire (${calId}) : ${reason}`)
+    throw new Error(`Agenda secondaire inaccessible : ${reason}. Vérifiez que le service account a accès à ce calendrier et que GOOGLE_SECONDARY_CALENDAR_ID est correct.`)
+  }
+
+  const busy = calData?.busy ?? []
+  console.log(`[freebusy] ${busy.length} plage(s) occupée(s) sur ${calId} entre ${timeMin} et ${timeMax}`)
+  return busy
 }
 
 /**

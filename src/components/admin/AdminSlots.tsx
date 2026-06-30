@@ -21,6 +21,7 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
   const [slots,    setSlots]    = useState<Slot[]>([])
   const [loading,  setLoading]  = useState(false)
   const [msg,      setMsg]      = useState('')
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
 
   // Générateur
   const [gen, setGen] = useState({
@@ -166,11 +167,19 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
                 <p>{emptyMsg}</p>
               </div>
             )}
-            {Object.entries(groupedMap).map(([week, weekSlots]) => (
+            {Object.entries(groupedMap).map(([week, weekSlots]) => {
+              const weekKey  = `${tab}__${week}`
+              const isOpen   = !collapsed[weekKey]
+              const toggleWk = () => setCollapsed(c => ({ ...c, [weekKey]: !c[weekKey] }))
+              return (
               <div key={week}>
-                <p className="text-xs font-semibold text-texte/40 uppercase tracking-wider mb-2">
+                <button type="button" onClick={toggleWk}
+                  className="flex items-center gap-2 text-xs font-semibold text-texte/40 uppercase tracking-wider mb-2 hover:text-texte/70 transition-colors w-full text-left">
+                  <span className="transition-transform duration-200" style={{ display:'inline-block', transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
                   Semaine du {week}
-                </p>
+                  <span className="ml-1 normal-case font-normal text-texte/30">({weekSlots.length} créneau{weekSlots.length > 1 ? 'x' : ''})</span>
+                </button>
+                {isOpen && (
                 <div className="space-y-2">
                   {weekSlots.map(slot => {
                     const d = new Date(slot.date+'T12:00:00')
@@ -224,8 +233,10 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
                     )
                   })}
                 </div>
+                )}
               </div>
-            ))}
+              )
+            })}
           </div>
         )
       })()}

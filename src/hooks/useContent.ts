@@ -68,7 +68,9 @@ export function useContentReady(): boolean {
 
 /** Récupère une valeur texte, avec fallback */
 export function cs(content: ContentMap, section: string, field: string, fallback = ''): string {
-  return content[section]?.[field] || fallback
+  // ?? (et non ||) : fallback uniquement si undefined/null, pas si chaîne vide intentionnelle
+  const val = content[section]?.[field]
+  return val !== undefined && val !== null ? val : fallback
 }
 
 /** Retourne les styles inline couleur + taille si définis dans le Sheet */
