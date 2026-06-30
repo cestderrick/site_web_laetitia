@@ -6,7 +6,20 @@ const path    = require('path')
 const app  = express()
 const PORT = process.env.PORT || 4000
 
-app.use(cors({ origin: process.env.FRONTEND_URL || '*' }))
+// Accepter plusieurs origines séparées par virgule dans FRONTEND_URL
+// ex: "https://site.onrender.com,https://www.pose-sophro.fr"
+const allowedOrigins = (process.env.FRONTEND_URL || '')
+  .split(',').map(s => s.trim()).filter(Boolean)
+
+app.use(cors({
+  origin: allowedOrigins.length > 0
+    ? (origin, cb) => {
+        // Autoriser les requêtes sans origin (Postman, curl) + les origines listées
+        if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
+        cb(new Error(`CORS bloqué pour l'origin: ${origin}`))
+      }
+    : '*',
+}))
 app.use(express.json())
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')))
 
