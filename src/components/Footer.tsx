@@ -18,9 +18,10 @@ export default function Footer() {
               className="object-contain mb-4"
             />
             <p className="text-blanc-casse/60 text-sm leading-relaxed">
-              Coaching & Sophrologie à Lyon et en distanciel
-              <br />
-              Un accompagnement hybride adapté à vos besoins.
+              Coaching & Sophrologie à Lyon 
+              <br />et en distanciel
+              <br /><br />
+              Un accompagnement hybride adapté à vos besoins
             </p>
           </div>
 
