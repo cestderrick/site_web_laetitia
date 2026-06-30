@@ -249,13 +249,18 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-texte/60 mb-1">Date de début</label>
-              <input type="date" value={gen.startDate} onChange={e=>setGen({...gen,startDate:e.target.value})}
+              <input type="date" value={gen.startDate} min={todayStr}
+                onChange={e => setGen(g => ({ ...g, startDate: e.target.value, endDate: g.endDate && g.endDate < e.target.value ? e.target.value : g.endDate }))}
                 className="w-full px-4 py-2 rounded-xl border border-rose-pastel/40 focus:outline-none focus:border-rose-saumon" />
             </div>
             <div>
               <label className="block text-sm text-texte/60 mb-1">Date de fin</label>
-              <input type="date" value={gen.endDate} onChange={e=>setGen({...gen,endDate:e.target.value})}
-                className="w-full px-4 py-2 rounded-xl border border-rose-pastel/40 focus:outline-none focus:border-rose-saumon" />
+              <input type="date" value={gen.endDate} min={gen.startDate || todayStr}
+                onChange={e=>setGen({...gen,endDate:e.target.value})}
+                className={`w-full px-4 py-2 rounded-xl border focus:outline-none focus:border-rose-saumon ${gen.endDate && gen.startDate && gen.endDate < gen.startDate ? 'border-red-400 bg-red-50' : 'border-rose-pastel/40'}`} />
+              {gen.endDate && gen.startDate && gen.endDate < gen.startDate && (
+                <p className="text-red-500 text-xs mt-1">La date de fin doit être ≥ à la date de début.</p>
+              )}
             </div>
           </div>
 
@@ -309,7 +314,7 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
             )}
           </div>
 
-          <button onClick={generate} disabled={loading||!gen.startDate||!gen.endDate}
+          <button onClick={generate} disabled={loading||!gen.startDate||!gen.endDate||(gen.endDate<gen.startDate)}
             className="btn-primary w-full disabled:opacity-60">
             {loading ? 'Génération…' : '⚡ Générer les créneaux'}
           </button>

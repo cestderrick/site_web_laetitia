@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useContent, cs, applyStyle, imgSrc, getAlign, renderRich } from '@/hooks/useContent'
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
@@ -87,6 +88,11 @@ export default function QuiSuisJe() {
                   <p className="text-texte/70 text-base">{visioLabel}</p>
                 </div>
               )}
+            </div>
+
+            {/* CTA contact */}
+            <div className="pt-2">
+              <Link href="/#contact" className="btn-outline">Me contacter</Link>
             </div>
           </div>
         </div>
