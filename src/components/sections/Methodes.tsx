@@ -15,7 +15,7 @@ const DS = {
 }
 
 const COACHING_POINTS    = ['Évolution professionnelle', 'Atteinte d\'un objectif', 'Confiance en soi', 'Accompagnement changements de vie']
-const SOPHROLOGIE_POINTS = ['Gestion du stress & anxiété', 'Préparation mentale', 'Accompagnement de la douleur', 'Séances individuelles ou en groupe']
+const SOPHROLOGIE_POINTS = ['Gestion du stress & anxiété', 'Préparation mentale', 'Accompagnement de la douleur', 'Travail de la concentration','Connexion au corps']
 
 export default function Methodes() {
   const content = useContent()
