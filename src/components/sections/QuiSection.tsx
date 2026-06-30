@@ -13,27 +13,11 @@ const D = {
   cta_bouton: 'Prendre rendez-vous',
 }
 
-const profils = [
-  {
-    emoji: '🌀',
-    titre: 'Vous traversez une transition',
-    desc:  "Changement de poste, reconversion, séparation, déménagement… Vous cherchez à retrouver un cap et à avancer avec clarté.",
-  },
-  {
-    emoji: '⚡',
-    titre: 'Vous êtes débordé·e ou épuisé·e',
-    desc:  "Stress chronique, surcharge mentale, difficulté à déconnecter. Vous avez besoin d'un espace et d'outils concrets pour retrouver du calme.",
-  },
-  {
-    emoji: '🌱',
-    titre: 'Vous souhaitez vous développer',
-    desc:  "Confiance en soi, affirmation de soi, gestion des émotions. Vous voulez mieux vous connaître et prendre conscience de vos ressources.",
-  },
-  {
-    emoji: '🎯',
-    titre: "Vous avez envie d'atteindre un objectif",
-    desc:  "Examen, compétition, prise de parole, projet de vie. Vous souhaitez préparer mentalement une étape importante.",
-  },
+const DEFAULT_PROFILS = [
+  { emoji: '🌀', titre: 'Vous traversez une transition',        desc: "Changement de poste, reconversion, séparation, déménagement… Vous cherchez à retrouver un cap et à avancer avec clarté." },
+  { emoji: '⚡', titre: 'Vous êtes débordé·e ou épuisé·e',      desc: "Stress chronique, surcharge mentale, difficulté à déconnecter. Vous avez besoin d'un espace et d'outils concrets pour retrouver du calme." },
+  { emoji: '🌱', titre: 'Vous souhaitez vous développer',       desc: "Confiance en soi, affirmation de soi, gestion des émotions. Vous voulez mieux vous connaître et prendre conscience de vos ressources." },
+  { emoji: '🎯', titre: "Vous avez envie d'atteindre un objectif", desc: "Examen, compétition, prise de parole, projet de vie. Vous souhaitez préparer mentalement une étape importante." },
 ]
 
 export default function QuiSection() {
@@ -45,6 +29,16 @@ export default function QuiSection() {
   const ctaTexte  = cs(content, S, 'cta_texte',  D.cta_texte)
   const ctaTitre  = cs(content, S, 'cta_titre',  D.cta_titre)
   const ctaBouton = cs(content, S, 'cta_bouton', D.cta_bouton)
+
+  // 4 cartes "Pour qui" — éditables depuis l'admin
+  const profils = DEFAULT_PROFILS.map((d, i) => {
+    const n = i + 1
+    return {
+      emoji: cs(content, S, `profil${n}_emoji`, d.emoji),
+      titre: cs(content, S, `profil${n}_titre`, d.titre),
+      desc:  cs(content, S, `profil${n}_desc`,  d.desc),
+    }
+  }).filter(p => p.titre.trim() || p.desc.trim())
 
   return (
     <section id="qui" className="section-padding bg-blanc-casse">

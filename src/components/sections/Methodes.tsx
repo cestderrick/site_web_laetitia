@@ -14,8 +14,12 @@ const DS = {
   texte:    "La Sophrologie Caycédienne, créée par le psychiatre et professeur Alfonso Caycedo, est une méthode d'accompagnement qui combine la respiration, le mouvement et les évocations positives afin d'amener du mieux-être.\n\nIl s'agit d'un entraînement de la conscience qui permet de développer la conscience de soi et d'activer ses propres ressources au quotidien.",
 }
 
-const COACHING_POINTS    = ['Évolution professionnelle', 'Atteinte d\'un objectif', 'Confiance en soi', 'Accompagnement changements de vie']
-const SOPHROLOGIE_POINTS = ['Gestion du stress & anxiété', 'Préparation mentale', 'Accompagnement de la douleur', 'Travail de la concentration','Connexion au corps']
+const DEFAULT_COACHING_POINTS    = 'Évolution professionnelle|Atteinte d\'un objectif|Confiance en soi|Accompagnement changements de vie'
+const DEFAULT_SOPHROLOGIE_POINTS = 'Gestion du stress & anxiété|Préparation mentale|Accompagnement de la douleur|Travail de la concentration|Connexion au corps'
+
+function parsePoints(raw: string): string[] {
+  return raw.split('|').map(s => s.trim()).filter(Boolean)
+}
 
 export default function Methodes() {
   const content = useContent()
@@ -29,8 +33,8 @@ export default function Methodes() {
       titre:   cs(content, 'coaching',    'titre',    DC.titre),
       accroche:cs(content, 'coaching',    'accroche', DC.accroche),
       texte:   cs(content, 'coaching',    'texte',    DC.texte),
-      points:  COACHING_POINTS,
-      cta:     'Réserver une séance',
+      points:  parsePoints(cs(content, 'coaching',    'points', DEFAULT_COACHING_POINTS)),
+      cta:     cs(content, 'coaching',    'cta',      'Réserver une séance'),
       lien:    '/rdv',
       section: 'coaching',
     },
@@ -42,8 +46,8 @@ export default function Methodes() {
       titre:   cs(content, 'sophrologie', 'titre',    DS.titre),
       accroche:cs(content, 'sophrologie', 'accroche', DS.accroche),
       texte:   cs(content, 'sophrologie', 'texte',    DS.texte),
-      points:  SOPHROLOGIE_POINTS,
-      cta:     'Je veux essayer',
+      points:  parsePoints(cs(content, 'sophrologie', 'points', DEFAULT_SOPHROLOGIE_POINTS)),
+      cta:     cs(content, 'sophrologie', 'cta',      'Je veux essayer'),
       lien:    '/rdv',
       section: 'sophrologie',
     },

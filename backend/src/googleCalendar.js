@@ -71,6 +71,7 @@ async function createAvailableSlotEvent(slot) {
       colorId:     '8', // Graphite (gris)
       start: { dateTime: startISO, timeZone: 'Europe/Paris' },
       end:   { dateTime: endISO,   timeZone: 'Europe/Paris' },
+      reminders: { useDefault: false, overrides: [] }, // aucun rappel
     },
   })
 
@@ -104,8 +105,7 @@ async function updateCalendarEventToBooking({ eventId, start, end, summary, loca
       reminders: {
         useDefault: false,
         overrides: [
-          { method: 'email', minutes: 60 * 24 },
-          { method: 'popup', minutes: 30 },
+          { method: 'popup', minutes: 15 },
         ],
       },
     },
@@ -140,8 +140,7 @@ async function createCalendarEvent({ start, end, summary, location, clientName, 
       reminders: {
         useDefault: false,
         overrides: [
-          { method: 'email', minutes: 60 * 24 },
-          { method: 'popup', minutes: 30 },
+          { method: 'popup', minutes: 15 },
         ],
       },
     },

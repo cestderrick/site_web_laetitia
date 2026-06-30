@@ -14,7 +14,7 @@ type Slot = {
   status: string; clientName?: string; clientEmail?: string
 }
 
-type Tab = 'list' | 'generate' | 'add'
+type Tab = 'list' | 'history' | 'generate' | 'add'
 
 export default function AdminSlots({ adminKey }: { adminKey: string }) {
   const [tab,      setTab]      = useState<Tab>('list')
@@ -107,8 +107,11 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
     setLoading(false)
   }
 
+  // Date du jour (YYYY-MM-DD) pour filtrage
+  const todayStr = new Date().toLocaleDateString('sv') // 'YYYY-MM-DD' via locale sv
+
   // Grouper par semaine
-  const grouped = slots.reduce<Record<string, Slot[]>>((acc, s) => {
+  const groupByWeek = (list: Slot[]) => list.reduce<Record<string, Slot[]>>((acc, s) => {
     const d = new Date(s.date + 'T12:00:00')
     const mon = new Date(d); mon.setDate(d.getDate() - ((d.getDay()+6)%7))
     const key = mon.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
@@ -116,6 +119,11 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
     acc[key].push(s)
     return acc
   }, {})
+
+  const futureSlots  = slots.filter(s => s.date >= todayStr)
+  const pastSlots    = slots.filter(s => s.date <  todayStr)
+  const grouped      = groupByWeek(futureSlots)
+  const groupedPast  = groupByWeek(pastSlots)
 
   return (
     <div className="space-y-6">
@@ -128,8 +136,13 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
       </div>
 
       {/* Onglets */}
-      <div className="flex gap-1 bg-blanc-casse rounded-xl p-1 w-fit">
-        {([['list','📋 Liste'],['generate','⚡ Générer'],['add','➕ Ajouter']] as [Tab,string][]).map(([t,l])=>(
+      <div className="flex gap-1 bg-blanc-casse rounded-xl p-1 w-fit flex-wrap">
+        {([
+          ['list',     `📋 À venir (${futureSlots.length})`],
+          ['history',  `📁 Historique (${pastSlots.length})`],
+          ['generate', '⚡ Générer'],
+          ['add',      '➕ Ajouter'],
+        ] as [Tab,string][]).map(([t,l])=>(
           <button key={t} onClick={()=>setTab(t)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab===t?'bg-white shadow text-rose-saumon':'text-texte/50 hover:text-texte'}`}>
             {l}
@@ -137,69 +150,84 @@ export default function AdminSlots({ adminKey }: { adminKey: string }) {
         ))}
       </div>
 
-      {/* ── LISTE ── */}
-      {tab === 'list' && (
-        <div className="space-y-6">
-          {loading && <p className="text-center text-texte/40 py-10">Chargement…</p>}
-          {!loading && slots.length === 0 && (
-            <div className="text-center py-16 text-texte/40">
-              <p className="text-4xl mb-3">📭</p>
-              <p>Aucun créneau. Utilisez "Générer" ou "Ajouter" pour en créer.</p>
-            </div>
-          )}
-          {Object.entries(grouped).map(([week, weekSlots]) => (
-            <div key={week}>
-              <p className="text-xs font-semibold text-texte/40 uppercase tracking-wider mb-2">
-                Semaine du {week}
-              </p>
-              <div className="space-y-2">
-                {weekSlots.map(slot => {
-                  const d = new Date(slot.date+'T12:00:00')
-                  const dayLabel = d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'short' })
-                  const isBooked = slot.status === 'booked'
-                  return (
-                    <div key={slot.id} className={`flex items-center gap-4 bg-white rounded-xl px-4 py-3 border ${isBooked?'border-rose-pastel/40 opacity-70':'border-vert-pastel bg-vert-pastel/10'}`}>
-                      <div className="flex-1 flex flex-wrap gap-x-4 gap-y-1 items-center">
-                        <span className="font-medium text-texte capitalize text-sm">{dayLabel}</span>
-                        <span className="text-texte/70 text-sm">{slot.startTime} – {slot.endTime}</span>
-                        <span className="text-texte/50 text-xs">{slot.durationMinutes} min</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          slot.location==='Visio' ? 'bg-vert-pastel/30 text-texte' :
-                          slot.location==='Lyon'  ? 'bg-rose-pastel/30 text-texte' :
-                          'bg-rose-saumon/20 text-texte'}`}>
-                          📍 {slot.location}
-                        </span>
-                        {slot.allowVisio && slot.location !== 'Visio' && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-vert-pastel/20 text-texte/60">💻 Visio possible</span>
-                        )}
-                        {isBooked && (
-                          <span className="text-xs text-rose-saumon font-medium">✅ {slot.clientName}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {isBooked && (
-                          <button onClick={() => releaseSlot(slot.id)}
-                            className="text-xs px-2.5 py-1 rounded-lg border border-vert-pastel/60 text-texte/50 hover:bg-vert-pastel/20 hover:text-texte transition-colors"
-                            title="Libérer ce créneau (annulation)">
-                            🔓 Libérer
-                          </button>
-                        )}
-                        {!isBooked && (
-                          <button onClick={() => deleteSlot(slot.id)}
-                            className="text-texte/20 hover:text-red-400 transition-colors text-lg"
-                            title="Supprimer">
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
+      {/* ── Rendu d'une liste de créneaux (réutilisé pour liste + historique) ── */}
+      {(tab === 'list' || tab === 'history') && (() => {
+        const isHistory  = tab === 'history'
+        const groupedMap = isHistory ? groupedPast : grouped
+        const emptyMsg   = isHistory ? 'Aucun créneau passé.' : 'Aucun créneau à venir. Utilisez "Générer" ou "Ajouter".'
+
+        return (
+          <div className="space-y-6">
+            {loading && <p className="text-center text-texte/40 py-10">Chargement…</p>}
+            {!loading && Object.keys(groupedMap).length === 0 && (
+              <div className="text-center py-16 text-texte/40">
+                <p className="text-4xl mb-3">{isHistory ? '📁' : '📭'}</p>
+                <p>{emptyMsg}</p>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            )}
+            {Object.entries(groupedMap).map(([week, weekSlots]) => (
+              <div key={week}>
+                <p className="text-xs font-semibold text-texte/40 uppercase tracking-wider mb-2">
+                  Semaine du {week}
+                </p>
+                <div className="space-y-2">
+                  {weekSlots.map(slot => {
+                    const d = new Date(slot.date+'T12:00:00')
+                    const dayLabel = d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'short' })
+                    const isBooked  = slot.status === 'booked'
+                    const rowStyle  = isBooked
+                      ? { borderColor: 'rgba(228,161,137,0.4)', opacity: 0.8 }
+                      : isHistory
+                        ? { borderColor: 'rgba(200,200,200,0.4)', backgroundColor: '#fafafa', opacity: 0.65 }
+                        : { borderColor: '#add3a0', backgroundColor: 'rgba(173,211,160,0.12)' }
+                    return (
+                      <div key={slot.id}
+                        className="flex items-center gap-4 bg-white rounded-xl px-4 py-3 border"
+                        style={rowStyle}>
+                        <div className="flex-1 flex flex-wrap gap-x-4 gap-y-1 items-center">
+                          <span className="font-medium text-texte capitalize text-sm">{dayLabel}</span>
+                          <span className="text-texte/70 text-sm">{slot.startTime} – {slot.endTime}</span>
+                          <span className="text-texte/50 text-xs">{slot.durationMinutes} min</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            slot.location==='Visio' ? 'bg-vert-pastel/30 text-texte' :
+                            slot.location==='Lyon'  ? 'bg-rose-pastel/30 text-texte' :
+                            'bg-rose-saumon/20 text-texte'}`}>
+                            📍 {slot.location}
+                          </span>
+                          {slot.allowVisio && slot.location !== 'Visio' && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-vert-pastel/20 text-texte/60">💻 Visio possible</span>
+                          )}
+                          {isBooked && (
+                            <span className="text-xs text-rose-saumon font-medium">✅ {slot.clientName}</span>
+                          )}
+                        </div>
+                        {!isHistory && (
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {isBooked && (
+                              <button onClick={() => releaseSlot(slot.id)}
+                                className="text-xs px-2.5 py-1 rounded-lg border border-vert-pastel/60 text-texte/50 hover:bg-vert-pastel/20 hover:text-texte transition-colors"
+                                title="Libérer ce créneau (annulation)">
+                                🔓 Libérer
+                              </button>
+                            )}
+                            {!isBooked && (
+                              <button onClick={() => deleteSlot(slot.id)}
+                                className="text-texte/20 hover:text-red-400 transition-colors text-lg"
+                                title="Supprimer">
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      })()}
 
       {/* ── GÉNÉRATEUR ── */}
       {tab === 'generate' && (

@@ -37,12 +37,14 @@ export default function Vision() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Textes — chacun avec son alignement propre */}
           <div className="space-y-6 text-texte/80 text-lg leading-relaxed">
-            <p dangerouslySetInnerHTML={renderRich(texte1)} style={getAlign(content, S, 'texte1')} />
-            <p dangerouslySetInnerHTML={renderRich(texte2)} style={getAlign(content, S, 'texte2')} />
-            <p style={getAlign(content, S, 'conviction')}>
-              <strong className="text-texte">Ma conviction :</strong>{' '}
-              <span dangerouslySetInnerHTML={renderRich(conviction)} />
-            </p>
+            {texte1.trim() && <p dangerouslySetInnerHTML={renderRich(texte1)} style={getAlign(content, S, 'texte1')} />}
+            {texte2.trim() && <p dangerouslySetInnerHTML={renderRich(texte2)} style={getAlign(content, S, 'texte2')} />}
+            {conviction.trim() && (
+              <p style={getAlign(content, S, 'conviction')}>
+                <strong className="text-texte">Ma conviction :</strong>{' '}
+                <span dangerouslySetInnerHTML={renderRich(conviction)} />
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-6">
