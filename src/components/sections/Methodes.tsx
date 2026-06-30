@@ -14,7 +14,7 @@ const DS = {
   texte:    "La Sophrologie Caycédienne, créée par le psychiatre et professeur Alfonso Caycedo, est une méthode d'accompagnement qui combine la respiration, le mouvement et les évocations positives afin d'amener du mieux-être.\n\nIl s'agit d'un entraînement de la conscience qui permet de développer la conscience de soi et d'activer ses propres ressources au quotidien.",
 }
 
-const COACHING_POINTS    = ['Transition professionnelle', 'Prise de décision', 'Confiance en soi', 'Gestion des émotions']
+const COACHING_POINTS    = ['Évolution professionnelle', 'Atteinte d\'un objectif', 'Confiance en soi', 'Accompagnement changements de vie']
 const SOPHROLOGIE_POINTS = ['Gestion du stress & anxiété', 'Préparation mentale', 'Accompagnement de la douleur', 'Séances individuelles ou en groupe']
 
 export default function Methodes() {
