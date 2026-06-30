@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import CookieBanner from '@/components/CookieBanner'
+import { LocaleProvider } from '@/context/LocaleContext'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -249,8 +250,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        {children}
-        <CookieBanner />
+        <LocaleProvider locale="fr">
+          {children}
+          <CookieBanner />
+        </LocaleProvider>
       </body>
     </html>
   )

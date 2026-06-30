@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useContent, cs } from '@/hooks/useContent'
+import { useLocale, LOCALES, localePrefix } from '@/context/LocaleContext'
+import { usePathname } from 'next/navigation'
 
 // Labels par défaut — écrasés si présents dans le Sheet
 const ND = {
@@ -39,7 +41,10 @@ export default function Navbar() {
   const [scrolled,           setScrolled]           = useState(false)
   const [menuOpen,           setMenuOpen]           = useState(false)
   const [mobileMethodesOpen, setMobileMethodesOpen] = useState(false)
-  const content = useContent()
+  const content  = useContent()
+  const locale   = useLocale()
+  const pathname = usePathname()
+  const p        = localePrefix(locale) // '' | '/en' | '/es'
 
   const instagram = cs(content, 'contact', 'instagram', 'https://www.instagram.com/laeti.sophrocoach/')
   const linkedin  = cs(content, 'contact', 'linkedin',  'https://www.linkedin.com/in/laetitia-chastel/')
@@ -48,21 +53,30 @@ export default function Navbar() {
   const l = (key: keyof typeof ND) => cs(content, 'navbar', key, ND[key])
 
   const navLinks = [
-    { label: l('lien_accueil'),     href: '/#accueil' },
-    { label: l('lien_qui_suis_je'), href: '/#qui-suis-je' },
-    { label: l('lien_vision'),      href: '/#vision' },
+    { label: l('lien_accueil'),     href: `${p}/#accueil` },
+    { label: l('lien_qui_suis_je'), href: `${p}/#qui-suis-je` },
+    { label: l('lien_vision'),      href: `${p}/#vision` },
     {
       label: l('lien_methodes'),
-      href: '/#methodes',
+      href: `${p}/#methodes`,
       children: [
-        { label: l('lien_coaching'),    href: '/#coaching' },
-        { label: l('lien_sophrologie'), href: '/#sophrologie' },
+        { label: l('lien_coaching'),    href: `${p}/#coaching` },
+        { label: l('lien_sophrologie'), href: `${p}/#sophrologie` },
       ],
     },
-    { label: l('lien_qui'),         href: '/#qui' },
-    { label: l('lien_entreprises'), href: '/entreprises' },
-    { label: l('lien_contact'),     href: '/#contact' },
+    { label: l('lien_qui'),         href: `${p}/#qui` },
+    { label: l('lien_entreprises'), href: `${p}/entreprises` },
+    { label: l('lien_contact'),     href: `${p}/#contact` },
   ]
+
+  /** Retourne le chemin équivalent pour une autre locale */
+  function switchLocalePath(targetLocale: string): string {
+    // Retirer le préfixe actuel et ajouter le nouveau
+    const withoutPrefix = locale === 'fr'
+      ? pathname
+      : pathname.replace(`/${locale}`, '') || '/'
+    return targetLocale === 'fr' ? withoutPrefix : `/${targetLocale}${withoutPrefix}`
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -130,9 +144,26 @@ export default function Navbar() {
             )}
           </li>
 
+          {/* Switcher de langue */}
+          <li className="flex items-center gap-1 text-xs border-l border-texte/10 pl-4">
+            {LOCALES.map((loc) => (
+              <Link
+                key={loc.code}
+                href={switchLocalePath(loc.code)}
+                className={`px-2 py-1 rounded transition-colors ${
+                  locale === loc.code
+                    ? 'text-rose-saumon font-semibold'
+                    : 'text-texte/40 hover:text-texte'
+                }`}
+              >
+                {loc.label}
+              </Link>
+            ))}
+          </li>
+
           {/* CTA */}
           <li>
-            <Link href="/rdv" className="btn-primary">{l('cta_label')}</Link>
+            <Link href={`${p}/rdv`} className="btn-primary">{l('cta_label')}</Link>
           </li>
         </ul>
 
@@ -192,7 +223,25 @@ export default function Navbar() {
             )}
           </div>
 
-          <Link href="/rdv" className="btn-primary text-center mt-3" onClick={() => setMenuOpen(false)}>
+          {/* Switcher langue mobile */}
+          <div className="flex items-center gap-2 pt-2">
+            {LOCALES.map((loc) => (
+              <Link
+                key={loc.code}
+                href={switchLocalePath(loc.code)}
+                onClick={() => setMenuOpen(false)}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                  locale === loc.code
+                    ? 'border-rose-saumon text-rose-saumon'
+                    : 'border-texte/20 text-texte/50 hover:border-texte/40 hover:text-texte'
+                }`}
+              >
+                {loc.flag} {loc.label}
+              </Link>
+            ))}
+          </div>
+
+          <Link href={`${p}/rdv`} className="btn-primary text-center mt-3" onClick={() => setMenuOpen(false)}>
             {l('cta_label')}
           </Link>
         </div>

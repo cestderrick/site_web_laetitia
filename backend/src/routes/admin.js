@@ -38,6 +38,30 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 },
 // ── VERIFY ───────────────────────────────────────────────────────────────────
 router.get('/verify', requireAdmin, (_req, res) => res.json({ ok: true }))
 
+// ── TRANSLATE ─────────────────────────────────────────────────────────────────
+// POST /api/admin/translate
+// body: { text: string, from: 'fr', to: 'en'|'es' }
+// Returns: { translated: string }
+router.post('/translate', requireAdmin, async (req, res) => {
+  const { text, from = 'fr', to } = req.body
+  if (!text || !to) return res.status(400).json({ error: 'text et to requis' })
+  if (!['en', 'es'].includes(to)) return res.status(400).json({ error: 'to doit être en ou es' })
+
+  try {
+    const langPair  = `${from.toUpperCase()}|${to.toUpperCase()}`
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}&de=ghironzicedric@gmail.com`
+    const resp = await fetch(url)
+    if (!resp.ok) throw new Error(`MyMemory HTTP ${resp.status}`)
+    const data = await resp.json()
+    if (data.responseStatus !== 200) throw new Error(data.responseDetails || 'Erreur MyMemory')
+    const translated = data.responseData?.translatedText || ''
+    res.json({ translated })
+  } catch (err) {
+    console.error('[translate]', err.message)
+    res.status(500).json({ error: `Traduction échouée : ${err.message}` })
+  }
+})
+
 // ── SLOTS ─────────────────────────────────────────────────────────────────────
 
 // GET /api/admin/slots  (admin)

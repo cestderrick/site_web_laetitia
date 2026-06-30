@@ -2,10 +2,29 @@
 
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
+import { useLocale, type Locale } from '@/context/LocaleContext'
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
 
 export type ContentMap = Record<string, Record<string, string>>
+
+/** Construit une ContentMap localisée : préfère field__en/field__es, sinon FR */
+function localizeContent(raw: ContentMap, locale: Locale): ContentMap {
+  if (locale === 'fr') return raw
+  const result: ContentMap = {}
+  for (const [section, fields] of Object.entries(raw)) {
+    result[section] = {}
+    for (const [field, value] of Object.entries(fields)) {
+      if (field.includes('__')) continue // champs de traduction bruts ignorés
+      const localKey = `${field}__${locale}`
+      const localVal = fields[localKey]
+      result[section][field] = (localVal !== undefined && localVal !== null && localVal !== '')
+        ? localVal
+        : value
+    }
+  }
+  return result
+}
 
 // Cache module-level : tous les composants partagent le même fetch
 let _cache:   ContentMap | null = null
@@ -41,16 +60,27 @@ export function invalidateContent() {
   _ready   = false
 }
 
-/** Hook React — retourne le contenu depuis le Sheet (avec fallback {} pendant le chargement) */
+/** Hook React — retourne le contenu depuis le Sheet, localisé selon le LocaleContext */
 export function useContent(): ContentMap {
-  const [content, setContent] = useState<ContentMap>(_cache || {})
+  const locale  = useLocale()
+  const [raw, setRaw] = useState<ContentMap>(_cache || {})
 
   useEffect(() => {
-    if (_cache) { setContent(_cache); return }
-    fetchContent().then(data => { if (data && Object.keys(data).length) setContent(data) })
+    if (_cache) { setRaw(_cache); return }
+    fetchContent().then(data => { if (data && Object.keys(data).length) setRaw(data) })
   }, [])
 
-  return content
+  return localizeContent(raw, locale)
+}
+
+/** Hook interne admin : retourne le contenu brut complet (toutes langues) */
+export function useRawContent(): ContentMap {
+  const [raw, setRaw] = useState<ContentMap>(_cache || {})
+  useEffect(() => {
+    if (_cache) { setRaw(_cache); return }
+    fetchContent().then(data => { if (data && Object.keys(data).length) setRaw(data) })
+  }, [])
+  return raw
 }
 
 /**
