@@ -6,7 +6,7 @@ import { useRawContent } from '@/hooks/useContent'
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
-const SKIP_PATTERNS = ['__en','__es','instagram','linkedin','photo','image','url','couleur','taille','align','_history']
+const SKIP_PATTERNS = ['__en','__es','instagram','linkedin','photo','image','url','_color','_size','_align','_history']
 function isSkipped(field: string) { return SKIP_PATTERNS.some(p => field.includes(p)) }
 
 type Locale = 'en' | 'es'
