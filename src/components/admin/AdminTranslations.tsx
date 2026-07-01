@@ -18,8 +18,9 @@ async function translateText(adminKey: string, text: string, to: Locale): Promis
     headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
     body: JSON.stringify({ text, from: 'fr', to }),
   })
-  if (!resp.ok) throw new Error((await resp.json()).error || 'Erreur traduction')
-  return (await resp.json()).translated || ''
+  const data = await resp.json()
+  if (!resp.ok) throw new Error(data.error || 'Erreur traduction')
+  return data.translated || ''
 }
 
 async function saveTranslations(adminKey: string, fullContent: Record<string, Record<string, string>>) {
@@ -40,6 +41,7 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
   const [activeLocale, setActiveLocale] = useState<Locale>('en')
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
   const [progress, setProgress]         = useState('')
+  const [errorMsg, setErrorMsg]         = useState('')
 
   useEffect(() => {
     if (!Object.keys(raw).length) return
@@ -64,11 +66,12 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
     }))
   }
 
-  async function translateField(section: string, field: string) {
+  async function translateField(section: string, field: string): Promise<boolean> {
     const frText = raw[section]?.[field] || ''
-    if (!frText.trim()) return
+    if (!frText.trim()) return true
     const key = `${section}.${field}`
     setTranslating(t => ({ ...t, [key]: true }))
+    setErrorMsg('')
     try {
       const en = await translateText(adminKey, frText, 'en')
       await sleep(1200)
@@ -77,26 +80,38 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
         ...prev,
         [section]: { ...prev[section], [field]: { en, es } },
       }))
+      return true
     } catch (e: any) {
-      setProgress(`Erreur ${key} — on continue...`); await sleep(2000)
+      setErrorMsg(`Erreur sur ${key} : ${e.message}`)
+      return false
     } finally {
       setTranslating(t => ({ ...t, [key]: false }))
     }
   }
 
   async function translateSection(section: string) {
+    setErrorMsg('')
     const fields = Object.keys(translations[section] || {})
     for (let i = 0; i < fields.length; i++) {
       setProgress(`${section} — champ ${i + 1}/${fields.length}`)
-      await translateField(section, fields[i])
+      const ok = await translateField(section, fields[i])
+      if (!ok) break // stop si erreur (ex : 429)
       if (i < fields.length - 1) await sleep(1500)
     }
+    setProgress('')
   }
 
   async function translateAll() {
+    setErrorMsg('')
     const sectionList = Object.keys(translations)
     for (let i = 0; i < sectionList.length; i++) {
-      await translateSection(sectionList[i])
+      const fields = Object.keys(translations[sectionList[i]] || {})
+      for (let j = 0; j < fields.length; j++) {
+        setProgress(`${sectionList[i]} — champ ${j + 1}/${fields.length}`)
+        const ok = await translateField(sectionList[i], fields[j])
+        if (!ok) { setProgress(''); return }
+        if (j < fields.length - 1) await sleep(1500)
+      }
       if (i < sectionList.length - 1) await sleep(1000)
     }
     setProgress('')
@@ -151,6 +166,13 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
         </div>
       )}
 
+      {errorMsg && (
+        <div className="bg-rose-saumon/10 border border-rose-saumon/40 rounded-xl px-4 py-3 text-sm text-rose-saumon flex items-start justify-between gap-3">
+          <span>{errorMsg}</span>
+          <button onClick={() => setErrorMsg('')} className="shrink-0 text-rose-saumon/60 hover:text-rose-saumon text-xs">X</button>
+        </div>
+      )}
+
       {savedMsg && (
         <div className="bg-vert-pastel/20 border border-vert-pastel/40 rounded-xl px-4 py-3 text-sm text-texte">
           {savedMsg}
@@ -169,7 +191,7 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
       {sections.map(section => {
         const fields = Object.entries(translations[section] || {})
         if (!fields.length) return null
-        const isOpen = openSections[section] !== false
+        const isOpen = openSections[section] === true
         const allTranslated = fields.every(([, l]) => l[activeLocale]?.trim())
         return (
           <div key={section} className="border border-rose-pastel/30 rounded-2xl overflow-hidden">
