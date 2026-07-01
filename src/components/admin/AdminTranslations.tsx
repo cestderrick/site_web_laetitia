@@ -4,17 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRawContent } from '@/hooks/useContent'
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
-const SKIP_PATTERNS = [
-  '__en', '__es',
-  'instagram', 'linkedin',
-  'photo', 'image', 'url',
-  'couleur', 'taille', 'align',
-  '_history',
-]
-function isSkipped(field: string) {
-  return SKIP_PATTERNS.some(p => field.includes(p))
-}
+const SKIP_PATTERNS = ['__en','__es','instagram','linkedin','photo','image','url','couleur','taille','align','_history']
+function isSkipped(field: string) { return SKIP_PATTERNS.some(p => field.includes(p)) }
 
 type Locale = 'en' | 'es'
 type TranslationState = Record<string, Record<string, Record<Locale, string>>>
@@ -26,8 +19,7 @@ async function translateText(adminKey: string, text: string, to: Locale): Promis
     body: JSON.stringify({ text, from: 'fr', to }),
   })
   if (!resp.ok) throw new Error((await resp.json()).error || 'Erreur traduction')
-  const d = await resp.json()
-  return d.translated || ''
+  return (await resp.json()).translated || ''
 }
 
 async function saveTranslations(adminKey: string, fullContent: Record<string, Record<string, string>>) {
@@ -39,8 +31,6 @@ async function saveTranslations(adminKey: string, fullContent: Record<string, Re
   if (!resp.ok) throw new Error((await resp.json()).error || 'Erreur sauvegarde')
 }
 
-const LANG_LABEL: Record<Locale, string> = { en: 'Anglais', es: 'Espagnol' }
-
 export default function AdminTranslations({ adminKey }: { adminKey: string }) {
   const raw = useRawContent()
   const [translations, setTranslations] = useState<TranslationState>({})
@@ -49,6 +39,7 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
   const [savedMsg, setSavedMsg]         = useState('')
   const [activeLocale, setActiveLocale] = useState<Locale>('en')
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
+  const [progress, setProgress]         = useState('')
 
   useEffect(() => {
     if (!Object.keys(raw).length) return
@@ -69,10 +60,7 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
   function setVal(section: string, field: string, locale: Locale, val: string) {
     setTranslations(prev => ({
       ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: { ...prev[section]?.[field], [locale]: val },
-      },
+      [section]: { ...prev[section], [field]: { ...prev[section]?.[field], [locale]: val } },
     }))
   }
 
@@ -82,39 +70,42 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
     const key = `${section}.${field}`
     setTranslating(t => ({ ...t, [key]: true }))
     try {
-      const [en, es] = await Promise.all([
-        translateText(adminKey, frText, 'en'),
-        translateText(adminKey, frText, 'es'),
-      ])
+      const en = await translateText(adminKey, frText, 'en')
+      await sleep(700)
+      const es = await translateText(adminKey, frText, 'es')
       setTranslations(prev => ({
         ...prev,
         [section]: { ...prev[section], [field]: { en, es } },
       }))
     } catch (e: any) {
-      alert(`Erreur traduction ${key} : ${e.message}`)
+      console.warn('[translate]', key, e.message)
     } finally {
       setTranslating(t => ({ ...t, [key]: false }))
     }
   }
 
   async function translateSection(section: string) {
-    for (const field of Object.keys(translations[section] || {})) {
-      await translateField(section, field)
+    const fields = Object.keys(translations[section] || {})
+    for (let i = 0; i < fields.length; i++) {
+      setProgress(`${section} — champ ${i + 1}/${fields.length}`)
+      await translateField(section, fields[i])
+      if (i < fields.length - 1) await sleep(900)
     }
   }
 
   async function translateAll() {
-    for (const section of Object.keys(translations)) {
-      await translateSection(section)
+    const sectionList = Object.keys(translations)
+    for (let i = 0; i < sectionList.length; i++) {
+      await translateSection(sectionList[i])
+      if (i < sectionList.length - 1) await sleep(600)
     }
+    setProgress('')
   }
 
   async function save() {
     setSaving(true)
     setSavedMsg('')
     try {
-      // Pour chaque section, on envoie raw complet + traductions injectées
-      // (le PUT backend fait un merge shallow par section)
       const fullContent: Record<string, Record<string, string>> = {}
       for (const [section, fields] of Object.entries(translations)) {
         fullContent[section] = { ...(raw[section] || {}) }
@@ -145,22 +136,20 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
           </p>
         </div>
         <div className="flex gap-3 flex-wrap">
-          <button
-            onClick={translateAll}
-            disabled={saving}
-            className="px-4 py-2 rounded-lg bg-vert-pastel/30 text-texte text-sm hover:bg-vert-pastel/50 transition-colors disabled:opacity-40"
-          >
+          <button onClick={translateAll} disabled={saving} className="px-4 py-2 rounded-lg bg-vert-pastel/30 text-texte text-sm hover:bg-vert-pastel/50 transition-colors disabled:opacity-40">
             Tout auto-traduire
           </button>
-          <button
-            onClick={save}
-            disabled={saving}
-            className="px-4 py-2 rounded-lg bg-rose-saumon text-white text-sm hover:bg-rose-saumon/80 transition-colors disabled:opacity-40"
-          >
+          <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg bg-rose-saumon text-white text-sm hover:bg-rose-saumon/80 transition-colors disabled:opacity-40">
             {saving ? 'Sauvegarde...' : 'Sauvegarder'}
           </button>
         </div>
       </div>
+
+      {progress && (
+        <div className="bg-blanc-casse border border-rose-pastel/30 rounded-xl px-4 py-3 text-sm text-texte/60">
+          Traduction en cours : {progress}
+        </div>
+      )}
 
       {savedMsg && (
         <div className="bg-vert-pastel/20 border border-vert-pastel/40 rounded-xl px-4 py-3 text-sm text-texte">
@@ -170,15 +159,8 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
 
       <div className="flex gap-2">
         {(['en', 'es'] as Locale[]).map(loc => (
-          <button
-            key={loc}
-            onClick={() => setActiveLocale(loc)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeLocale === loc
-                ? 'bg-rose-pastel/40 text-texte'
-                : 'text-texte/50 hover:text-texte'
-            }`}
-          >
+          <button key={loc} onClick={() => setActiveLocale(loc)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeLocale === loc ? 'bg-rose-pastel/40 text-texte' : 'text-texte/50 hover:text-texte'}`}>
             {loc === 'en' ? 'Anglais' : 'Espagnol'}
           </button>
         ))}
@@ -192,22 +174,16 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
         return (
           <div key={section} className="border border-rose-pastel/30 rounded-2xl overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 bg-rose-pastel/10">
-              <button
-                className="flex items-center gap-3 flex-1 text-left"
-                onClick={() => setOpenSections(s => ({ ...s, [section]: !isOpen }))}
-              >
+              <button className="flex items-center gap-3 flex-1 text-left"
+                onClick={() => setOpenSections(s => ({ ...s, [section]: !isOpen }))}>
                 <span className={`text-xs transition-transform ${isOpen ? 'rotate-90' : ''}`}>{'>'}</span>
                 <span className="font-medium text-texte capitalize">{section}</span>
                 {!allTranslated && (
-                  <span className="text-xs px-2 py-0.5 bg-rose-saumon/20 text-rose-saumon rounded-full">
-                    A completer
-                  </span>
+                  <span className="text-xs px-2 py-0.5 bg-rose-saumon/20 text-rose-saumon rounded-full">A completer</span>
                 )}
               </button>
-              <button
-                onClick={() => translateSection(section)}
-                className="text-xs px-3 py-1.5 rounded-lg bg-blanc-casse border border-vert-pastel/40 text-texte/60 hover:text-texte hover:border-vert-pastel transition-colors"
-              >
+              <button onClick={() => translateSection(section)}
+                className="text-xs px-3 py-1.5 rounded-lg bg-blanc-casse border border-vert-pastel/40 text-texte/60 hover:text-texte hover:border-vert-pastel transition-colors">
                 Auto-traduire section
               </button>
             </div>
@@ -216,8 +192,7 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
               <div className="divide-y divide-rose-pastel/20">
                 {fields.map(([field, locales]) => {
                   const frText = raw[section]?.[field] || ''
-                  const translKey = `${section}.${field}`
-                  const isLoading = translating[translKey]
+                  const isLoading = translating[`${section}.${field}`]
                   return (
                     <div key={field} className="px-5 py-4 grid gap-3">
                       <div className="flex items-start justify-between gap-4">
@@ -227,21 +202,17 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
                             {frText || <span className="italic text-texte/30">Vide</span>}
                           </p>
                         </div>
-                        <button
-                          onClick={() => translateField(section, field)}
+                        <button onClick={() => translateField(section, field)}
                           disabled={isLoading || !frText.trim()}
-                          title="Auto-traduire ce champ"
-                          className="shrink-0 mt-5 w-8 h-8 flex items-center justify-center rounded-lg bg-vert-pastel/20 hover:bg-vert-pastel/40 text-texte/60 transition-colors disabled:opacity-30 text-xs"
-                        >
+                          className="shrink-0 mt-5 w-8 h-8 flex items-center justify-center rounded-lg bg-vert-pastel/20 hover:bg-vert-pastel/40 text-texte/60 transition-colors disabled:opacity-30 text-xs">
                           {isLoading ? '...' : 'TR'}
                         </button>
                       </div>
                       <div>
                         <label className="text-xs text-texte/40 mb-1 block">
-                          {LANG_LABEL[activeLocale]}
+                          {activeLocale === 'en' ? 'Anglais' : 'Espagnol'}
                         </label>
-                        <textarea
-                          value={locales[activeLocale] || ''}
+                        <textarea value={locales[activeLocale] || ''}
                           onChange={e => setVal(section, field, activeLocale, e.target.value)}
                           rows={frText.length > 100 ? 3 : 2}
                           className="w-full rounded-xl border border-rose-pastel/30 bg-white px-3 py-2 text-sm text-texte resize-none focus:outline-none focus:border-rose-saumon/50 transition-colors"
