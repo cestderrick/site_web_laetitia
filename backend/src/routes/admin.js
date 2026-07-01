@@ -47,14 +47,28 @@ router.post('/translate', requireAdmin, async (req, res) => {
   if (!text || !to) return res.status(400).json({ error: 'text et to requis' })
   if (!['en', 'es'].includes(to)) return res.status(400).json({ error: 'to doit être en ou es' })
 
-  try {
-    const langPair  = `${from.toUpperCase()}|${to.toUpperCase()}`
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}&de=ghironzicedric@gmail.com`
+  const langPair = `${from.toUpperCase()}|${to.toUpperCase()}`
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}&de=ghironzicedric@gmail.com`
+
+  const attempt = async () => {
     const resp = await fetch(url)
+    if (resp.status === 429) return null          // signal 429 pour retry
     if (!resp.ok) throw new Error(`MyMemory HTTP ${resp.status}`)
     const data = await resp.json()
+    // responseStatus 429 aussi possible dans le JSON
+    if (data.responseStatus === 429) return null
     if (data.responseStatus !== 200) throw new Error(data.responseDetails || 'Erreur MyMemory')
-    const translated = data.responseData?.translatedText || ''
+    return data.responseData?.translatedText || ''
+  }
+
+  try {
+    let translated = await attempt()
+    if (translated === null) {
+      // 429 : on attend 4s et on réessaie une fois
+      await new Promise(r => setTimeout(r, 4000))
+      translated = await attempt()
+      if (translated === null) throw new Error('Limite de l\'API atteinte (429). Réessayez dans quelques secondes.')
+    }
     res.json({ translated })
   } catch (err) {
     console.error('[translate]', err.message)

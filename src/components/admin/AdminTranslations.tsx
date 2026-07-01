@@ -71,14 +71,14 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
     setTranslating(t => ({ ...t, [key]: true }))
     try {
       const en = await translateText(adminKey, frText, 'en')
-      await sleep(700)
+      await sleep(1200)
       const es = await translateText(adminKey, frText, 'es')
       setTranslations(prev => ({
         ...prev,
         [section]: { ...prev[section], [field]: { en, es } },
       }))
     } catch (e: any) {
-      console.warn('[translate]', key, e.message)
+      setProgress(`Erreur ${key} — on continue...`); await sleep(2000)
     } finally {
       setTranslating(t => ({ ...t, [key]: false }))
     }
@@ -89,7 +89,7 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
     for (let i = 0; i < fields.length; i++) {
       setProgress(`${section} — champ ${i + 1}/${fields.length}`)
       await translateField(section, fields[i])
-      if (i < fields.length - 1) await sleep(900)
+      if (i < fields.length - 1) await sleep(1500)
     }
   }
 
@@ -97,7 +97,7 @@ export default function AdminTranslations({ adminKey }: { adminKey: string }) {
     const sectionList = Object.keys(translations)
     for (let i = 0; i < sectionList.length; i++) {
       await translateSection(sectionList[i])
-      if (i < sectionList.length - 1) await sleep(600)
+      if (i < sectionList.length - 1) await sleep(1000)
     }
     setProgress('')
   }
